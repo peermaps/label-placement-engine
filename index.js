@@ -1,6 +1,7 @@
 var tritri = require('robust-triangle-triangle-2d-intersect')
 var tri0 = [[0,0],[0,0],[0,0]]
 var tri1 = [[0,0],[0,0],[0,0]]
+var bbox = [0,0,0,0]
 
 module.exports = LabelMaker
 
@@ -18,20 +19,23 @@ function LabelMaker (opts) {
     positions: null,
     cells: null,
     visible: null,
-    labels: null
+    labels: null,
+    bounds: null,
+    bbox: null
   }
   this._dst = {
     positions: { offset: 0, data: null },
     cells: { offset: 0, data: null },
+    bounds: { offset: 0, data: null },
     state: null
   }
   this._states = null
-  this._size = { positions: 0, cells: 0 }
+  this._size = { positions: 0, cells: 0, bounds: 0 }
 }
 
 LabelMaker.prototype.update = function (features) {
   this._features = features
-  var plen = 0, clen = 0
+  var plen = 0, clen = 0, blen = 0
   if (!this._states || this._states.length !== features.length) {
     this._states = Array(features.length)
   }
@@ -39,9 +43,13 @@ LabelMaker.prototype.update = function (features) {
     var f = features[i]
     var t = this._types[f.type]
     if (!t) throw new Error('implementation not provided for type=' + f.type)
+    this._size.positions = 0
+    this._size.cells = 0
+    this._size.bounds = 0
     t.size(this._size, features[i])
     plen += this._size.positions
     clen += this._size.cells
+    blen += this._size.bounds
     this._states[i] = t.initialState
   }
   if (!this._buffers.positions || plen > this._buffers.positions.length) {
@@ -59,6 +67,12 @@ LabelMaker.prototype.update = function (features) {
     }
     this._buffers.cells = new F(clen)
   }
+  if (!this._buffers.bounds || blen > this._buffers.bounds.length) {
+    this._buffers.bounds = new Float32Array(blen)
+  }
+  if (!this._buffers.bbox || features.length * 4 > this._buffers.bbox.length) {
+    this._buffers.bbox = new Float32Array(features.length * 4)
+  }
 }
 
 LabelMaker.prototype.step = function () {
@@ -67,6 +81,8 @@ LabelMaker.prototype.step = function () {
   this._dst.positions.data = this._buffers.positions
   this._dst.cells.offset = 0
   this._dst.cells.data = this._buffers.cells
+  this._dst.bounds.offset = 0
+  this._dst.bounds.data = this._buffers.bounds
   var updates = 0
   for (var i = 0; i < this._features.length; i++) {
     var f = this._features[i]
@@ -74,6 +90,7 @@ LabelMaker.prototype.step = function () {
     if (!t) throw new Error('implementation not provided for type=' + f.type)
     var pstart = this._dst.positions.offset
     var cstart = this._dst.cells.offset
+    var bstart = this._dst.bounds.offset
     if (this._buffers.visible[pstart/2]) {
       t.size(this._size, this._features[i])
       this._dst.positions.offset += this._size.positions
@@ -85,9 +102,25 @@ LabelMaker.prototype.step = function () {
     t.write(this._dst, this._features[i])
     var pend = this._dst.positions.offset
     var cend = this._dst.cells.offset
+    var bend = this._dst.bounds.offset
     for (var j = cstart; j < cend; j++) {
       this._buffers.cells[j] += pstart/2
     }
+
+    bbox[0] = Infinity
+    bbox[1] = Infinity
+    bbox[2] = -Infinity
+    bbox[3] = -Infinity
+    for (var j = bstart; j < bend; j+=2) {
+      bbox[0] = Math.min(bbox[0], this._buffers.bounds[j+0])
+      bbox[1] = Math.min(bbox[1], this._buffers.bounds[j+1])
+      bbox[2] = Math.max(bbox[0], this._buffers.bounds[j+2])
+      bbox[3] = Math.max(bbox[1], this._buffers.bounds[j+3])
+    }
+    this._buffers.bbox[i*4+0] = bbox[0]
+    this._buffers.bbox[i*4+1] = bbox[1]
+    this._buffers.bbox[i*4+2] = bbox[2]
+    this._buffers.bbox[i*4+3] = bbox[3]
 
     var visible = true
     for (var j = cstart; j < cend; j+=3) {
@@ -137,4 +170,9 @@ LabelMaker.prototype.step = function () {
     this.data.cells = this._buffers.cells.subarray(0,cend)
   }
   return updates
+}
+
+function boxOverlap(ai, a, bi, b) {
+  return a[ai+2] >= b[bi+0] && a[ai+0] <= b[bi+2]
+    && a[ai+3] >= b[bi+1] && a[ai+1] <= b[bi+3]
 }

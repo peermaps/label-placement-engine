@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "robust-triangle-triangle-2d-intersect": "^1.0.0"
+  }
+}

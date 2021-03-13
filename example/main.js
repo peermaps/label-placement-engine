@@ -139,10 +139,20 @@ for (var i = 0; i < 150; i++) {
     pointSeparation: [0,0]
   })
 }
+var counts = { point: 0, line: 0 }
+for (var i = 0; i < labels.length; i++) {
+  if (labels[i].type === 'point') {
+    counts.point++
+  } else if (labels[i].type === 'line') {
+    counts.line += labels[i].points.length*2
+  }
+}
+
 //setInterval(randomize, 1000)
 
 function randomize() {
   for (var i = 0; i < labels.length; i++) {
+    if (labels[i].type !== 'point') continue
     labels[i].pxLabelSize[0] = 50 + Math.random()*150
     labels[i].pxLabelSize[1] = 20
     labels[i].point[0] = Math.random()*2-1
@@ -152,9 +162,13 @@ function randomize() {
 }
 
 var points = {
-  positions: new Float32Array(labels.length*2),
-  active: new Float32Array(labels.length)
+  positions: new Float32Array(counts.point*2),
+  active: new Float32Array(counts.point)
 }
+var lines = {
+  positions: new Float32Array(counts.line*2)
+}
+
 var bboxes = {
   positions: null,
   active: null
@@ -164,6 +178,7 @@ function update() {
   var m = Math.max(window.innerWidth,window.innerHeight)
   var w = window.innerWidth, h = window.innerHeight
   for (var i = 0; i < labels.length; i++) {
+    if (labels[i].type !== 'point') continue
     labels[i].labelSize[0] = labels[i].pxLabelSize[0]/w*2
     labels[i].labelSize[1] = labels[i].pxLabelSize[1]/h*2
     labels[i].labelMargin[0] = labels[i].pxLabelMargin[0]/w*2
@@ -198,43 +213,8 @@ function update() {
       bboxes.active[aoffset++] = labelEngine._visible[i]
     }
   }
-  /*
-  var poffset = 0, aoffset = 0
-  for (var i = 0; i < labelEngine._buffers.bbox.length; i+=4) {
-    var xmin = labelEngine._buffers.bbox[i+0]
-    var ymin = labelEngine._buffers.bbox[i+1]
-    var xmax = labelEngine._buffers.bbox[i+2]
-    var ymax = labelEngine._buffers.bbox[i+3]
-    bboxes.positions[poffset++] = xmin
-    bboxes.positions[poffset++] = ymin
-    bboxes.positions[poffset++] = xmax
-    bboxes.positions[poffset++] = ymin
-    bboxes.active[aoffset++] = labelEngine._visible[i/4]
-    bboxes.active[aoffset++] = labelEngine._visible[i/4]
-
-    bboxes.positions[poffset++] = xmax
-    bboxes.positions[poffset++] = ymin
-    bboxes.positions[poffset++] = xmax
-    bboxes.positions[poffset++] = ymax
-    bboxes.active[aoffset++] = labelEngine._visible[i/4]
-    bboxes.active[aoffset++] = labelEngine._visible[i/4]
-
-    bboxes.positions[poffset++] = xmax
-    bboxes.positions[poffset++] = ymax
-    bboxes.positions[poffset++] = xmin
-    bboxes.positions[poffset++] = ymax
-    bboxes.active[aoffset++] = labelEngine._visible[i/4]
-    bboxes.active[aoffset++] = labelEngine._visible[i/4]
-
-    bboxes.positions[poffset++] = xmin
-    bboxes.positions[poffset++] = ymax
-    bboxes.positions[poffset++] = xmin
-    bboxes.positions[poffset++] = ymin
-    bboxes.active[aoffset++] = labelEngine._visible[i/4]
-    bboxes.active[aoffset++] = labelEngine._visible[i/4]
-  }
-  */
   for (var i = 0; i < labels.length; i++) {
+    if (labels[i].type !== 'point') continue
     points.positions[i*2+0] = labels[i].point[0]
     points.positions[i*2+1] = labels[i].point[1]
     points.active[i] = labelEngine._visible[i]

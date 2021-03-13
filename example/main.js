@@ -10,90 +10,95 @@ var labelEngine = require('../')({
       initialState: 0,
       write: function (out, f) {
         var xmin, ymin, xmax, ymax
+        // labelSize: [0,0], // dimensions of the label
+        // labelMargin: [0,0], // space around the label
+        // pointSize: [10,10], // size of the point
+        // pointMargin: [5,5], // space around the point
+        // pointSeparation: [10,10], // distance between the label and point
         if (out.state === 0) { // top
-          xmin = f.point[0] - f.size[0]/2
-          xmax = f.point[0] + f.size[0]/2
-          ymin = f.point[1] + f.space[1]
-          ymax = f.point[1] + f.space[1] + f.size[1]
-          out.bounds.data[out.bounds.offset++] = xmin - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] - f.space[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] - f.space[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1] - f.space[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] + f.space[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1] - f.space[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] + f.space[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmin + f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmin + f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymax + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmin - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymax + f.pad[1]
+          xmin = f.point[0] - f.labelSize[0]/2
+          xmax = f.point[0] + f.labelSize[0]/2
+          ymin = f.point[1] + f.pointMargin[1]
+          ymax = f.point[1] + f.pointMargin[1] + f.labelSize[1]
+          out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymin - f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymin - f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] - f.pointSize[1]/2 - f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] + f.pointSize[0]/2 + f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] - f.pointSize[1]/2 - f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] + f.pointSize[0]/2 + f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymin - f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmax + f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymin - f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmax + f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
         } else if (out.state === 1) { // bottom
-          xmin = f.point[0] - f.size[0]/2
-          xmax = f.point[0] + f.size[0]/2
-          ymin = f.point[1] - f.space[1] - f.size[1]
-          ymax = f.point[1] - f.space[1]
-          out.bounds.data[out.bounds.offset++] = xmin - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmax + f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmax + f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymax + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] + f.space[0]
-          out.bounds.data[out.bounds.offset++] = ymax + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] + f.space[0]
-          out.bounds.data[out.bounds.offset++] = f.point[1] + f.space[1] + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] - f.space[0]
-          out.bounds.data[out.bounds.offset++] = f.point[1] + f.space[1] + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] - f.space[0]
-          out.bounds.data[out.bounds.offset++] = ymax + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmin - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymax + f.pad[1]
+          xmin = f.point[0] - f.labelSize[0]/2
+          xmax = f.point[0] + f.labelSize[0]/2
+          ymin = f.point[1] - f.pointMargin[1] - f.labelSize[1]
+          ymax = f.point[1] - f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymin - f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmax + f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymin - f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmax + f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] + f.pointSize[0]/2 + f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] + f.pointSize[0]/2 + f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] + f.pointSize[1]/2 + f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] + f.pointSize[1]/2 + f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
         } else if (out.state === 2) { // right
-          xmin = f.point[0] + f.space[0]
-          xmax = f.point[0] + f.space[0] + f.size[0]
-          ymin = f.point[1] - f.size[1]/2
-          ymax = f.point[1] + f.size[1]/2
-          out.bounds.data[out.bounds.offset++] = f.point[0] - f.space[0] - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = f.point[1] - f.space[1] - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmin - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = f.point[1] - f.space[1] - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmin - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmax + f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmax + f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymax + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmin - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymax + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmin - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = f.point[1] + f.space[1] + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] - f.space[0] - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = f.point[1] + f.space[1] + f.pad[1]
+          xmin = f.point[0] + f.pointSize[0]/2 + f.pointMargin[0]
+          xmax = f.point[0] + f.pointSize[0]/2 + f.pointMargin[0] + f.labelSize[0]
+          ymin = f.point[1] - f.labelSize[1]/2
+          ymax = f.point[1] + f.labelSize[1]/2
+          out.bounds.data[out.bounds.offset++] = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] - f.pointSize[1]/2 - f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] - f.pointSize[1]/2 - f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymin - f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmax + f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymin - f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmax + f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] + f.pointSize[1]/2 + f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] + f.pointSize[1]/2 + f.pointMargin[1]
         } else if (out.state === 3) { // left
-          xmin = f.point[0] - f.space[0] - f.size[0]
-          xmax = f.point[0] - f.space[0]
-          ymin = f.point[1] - f.size[1]/2
-          ymax = f.point[1] + f.size[1]/2
-          out.bounds.data[out.bounds.offset++] = xmin - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] - f.space[0] - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymin - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] - f.space[0] - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = f.point[1] - f.space[1] - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] + f.space[0] + f.pad[0]
-          out.bounds.data[out.bounds.offset++] = f.point[1] - f.space[1] - f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] + f.space[0] + f.pad[0]
-          out.bounds.data[out.bounds.offset++] = f.point[1] + f.space[1] + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] - f.space[0] - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = f.point[1] + f.space[1] + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = f.point[0] - f.space[0] - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymax + f.pad[1]
-          out.bounds.data[out.bounds.offset++] = xmin - f.pad[0]
-          out.bounds.data[out.bounds.offset++] = ymax + f.pad[1]
+          xmin = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0] - f.labelSize[0]
+          xmax = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
+          ymin = f.point[1] - f.labelSize[1]/2
+          ymax = f.point[1] + f.labelSize[1]/2
+          out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymin - f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymin - f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] - f.pointSize[1]/2 - f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] + f.pointSize[0]/2 + f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] - f.pointSize[1]/2 - f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] + f.pointSize[0]/2 + f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] + f.pointSize[1]/2 + f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = f.point[1] + f.pointSize[1]/2 + f.pointMargin[1]
+          out.bounds.data[out.bounds.offset++] = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
+          out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
+          out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
         } else {
           return
         }
@@ -121,42 +126,128 @@ var labels = []
 for (var i = 0; i < 150; i++) {
   labels.push({
     type: 'point',
-    pxSize: [80,25],
-    pxSpace: [10,10],
-    pxPad: [10,10],
-    size: [0,0],
-    space: [0,0],
-    pad: [0,0],
-    point: [Math.random()*2-1,Math.random()*2-1]
+    pxLabelSize: [0,0], // dimensions of the label
+    pxLabelMargin: [10,10], // space around the label
+    pxPointSize: [10,10], // size of the point
+    pxPointMargin: [10,10], // space around the point
+    pxPointSeparation: [10,10], // distance between the label and point
+    labelSize: [0,0],
+    labelMargin: [0,0],
+    pointSize: [0,0],
+    pointMargin: [0,0],
+    point:[0,0],
+    pointSeparation: [0,0]
   })
 }
+//setInterval(randomize, 1000)
+
+function randomize() {
+  for (var i = 0; i < labels.length; i++) {
+    labels[i].pxLabelSize[0] = 50 + Math.random()*150
+    labels[i].pxLabelSize[1] = 20
+    labels[i].point[0] = Math.random()*2-1
+    labels[i].point[1] = Math.random()*2-1
+  }
+  update()
+}
+
 var points = {
-  positions: labels.map((l) => l.point)
+  positions: new Float32Array(labels.length*2),
+  active: new Float32Array(labels.length)
+}
+var bboxes = {
+  positions: null,
+  active: null
 }
 
 function update() {
   var m = Math.max(window.innerWidth,window.innerHeight)
   var w = window.innerWidth, h = window.innerHeight
   for (var i = 0; i < labels.length; i++) {
-    labels[i].size[0] = labels[i].pxSize[0]/w*2
-    labels[i].size[1] = labels[i].pxSize[1]/h*2
-    labels[i].space[0] = labels[i].pxSpace[0]/w*2
-    labels[i].space[1] = labels[i].pxSpace[1]/h*2
-    labels[i].pad[0] = labels[i].pxPad[0]/w*2
-    labels[i].pad[1] = labels[i].pxPad[1]/h*2
+    labels[i].labelSize[0] = labels[i].pxLabelSize[0]/w*2
+    labels[i].labelSize[1] = labels[i].pxLabelSize[1]/h*2
+    labels[i].labelMargin[0] = labels[i].pxLabelMargin[0]/w*2
+    labels[i].labelMargin[1] = labels[i].pxLabelMargin[1]/h*2
+    labels[i].pointSize[0] = labels[i].pxPointSize[0]/w*2
+    labels[i].pointSize[1] = labels[i].pxPointSize[1]/h*2
+    labels[i].pointMargin[0] = labels[i].pxPointMargin[0]/w*2
+    labels[i].pointMargin[1] = labels[i].pxPointMargin[1]/h*2
+    labels[i].pointSeparation[0] = labels[i].pxPointSeparation[0]/w*2
+    labels[i].pointSeparation[1] = labels[i].pxPointSeparation[1]/h*2
   }
   labelEngine.update(labels)
   for (var i = 0; i < 4; i++) {
     if (labelEngine.step() === 0) break
+  }
+
+  if (!bboxes.positions) {
+    bboxes.positions = new Float32Array(labelEngine._buffers.bounds.length*2)
+    bboxes.active = new Float32Array(labelEngine._buffers.bounds.length)
+  }
+  var poffset = 0, aoffset = 0
+  for (var i = 0; i < labels.length; i++) {
+    var bstart = labelEngine._offsets.bounds[i*2+0]
+    var bend = labelEngine._offsets.bounds[i*2+1]
+    var n = bend-bstart
+    for (var j = 0; j < n; j+=2) {
+      bboxes.positions[poffset++] = labelEngine._buffers.bounds[bstart+j+0]
+      bboxes.positions[poffset++] = labelEngine._buffers.bounds[bstart+j+1]
+      bboxes.positions[poffset++] = labelEngine._buffers.bounds[bstart+(j+2)%n+0]
+      bboxes.positions[poffset++] = labelEngine._buffers.bounds[bstart+(j+2)%n+1]
+      bboxes.active[aoffset++] = labelEngine._visible[i]
+      bboxes.active[aoffset++] = labelEngine._visible[i]
+    }
+  }
+  /*
+  var poffset = 0, aoffset = 0
+  for (var i = 0; i < labelEngine._buffers.bbox.length; i+=4) {
+    var xmin = labelEngine._buffers.bbox[i+0]
+    var ymin = labelEngine._buffers.bbox[i+1]
+    var xmax = labelEngine._buffers.bbox[i+2]
+    var ymax = labelEngine._buffers.bbox[i+3]
+    bboxes.positions[poffset++] = xmin
+    bboxes.positions[poffset++] = ymin
+    bboxes.positions[poffset++] = xmax
+    bboxes.positions[poffset++] = ymin
+    bboxes.active[aoffset++] = labelEngine._visible[i/4]
+    bboxes.active[aoffset++] = labelEngine._visible[i/4]
+
+    bboxes.positions[poffset++] = xmax
+    bboxes.positions[poffset++] = ymin
+    bboxes.positions[poffset++] = xmax
+    bboxes.positions[poffset++] = ymax
+    bboxes.active[aoffset++] = labelEngine._visible[i/4]
+    bboxes.active[aoffset++] = labelEngine._visible[i/4]
+
+    bboxes.positions[poffset++] = xmax
+    bboxes.positions[poffset++] = ymax
+    bboxes.positions[poffset++] = xmin
+    bboxes.positions[poffset++] = ymax
+    bboxes.active[aoffset++] = labelEngine._visible[i/4]
+    bboxes.active[aoffset++] = labelEngine._visible[i/4]
+
+    bboxes.positions[poffset++] = xmin
+    bboxes.positions[poffset++] = ymax
+    bboxes.positions[poffset++] = xmin
+    bboxes.positions[poffset++] = ymin
+    bboxes.active[aoffset++] = labelEngine._visible[i/4]
+    bboxes.active[aoffset++] = labelEngine._visible[i/4]
+  }
+  */
+  for (var i = 0; i < labels.length; i++) {
+    points.positions[i*2+0] = labels[i].point[0]
+    points.positions[i*2+1] = labels[i].point[1]
+    points.active[i] = labelEngine._visible[i]
   }
   frame()
 }
 
 var draw = {
   point: point(regl),
+  bbox: bbox(regl),
   box: box(regl),
 }
-update()
+randomize()
 
 window.addEventListener('resize', update)
 
@@ -165,6 +256,7 @@ function frame() {
   regl.clear({ color: [0,0,0,1], depth: true })
   draw.box(labelEngine.data)
   draw.point(points)
+  draw.bbox(bboxes)
 }
 
 function box(regl) {
@@ -199,22 +291,56 @@ function point(regl) {
   return regl({
     frag: `
       precision highp float;
+      varying float vactive;
       void main() {
-        gl_FragColor = vec4(1,1,1,1);
+        gl_FragColor = vec4(mix(vec3(0.3),vec3(1),vactive),1);
       }
     `,
     vert: `
       precision highp float;
       attribute vec2 position;
+      attribute float active;
+      varying float vactive;
       void main() {
+        vactive = active;
         gl_Position = vec4(position,0,1);
         gl_PointSize = 10.0;
       }
     `,
     primitive: 'points',
     attributes: {
-      position: regl.prop('positions')
+      position: regl.prop('positions'),
+      active: regl.prop('active')
     },
-    count: (context,props) => props.positions.length
+    count: (context,props) => props.positions.length/2
+  })
+}
+
+function bbox(regl) {
+  return regl({
+    frag: `
+      precision highp float;
+      varying float vactive;
+      void main() {
+        gl_FragColor = vec4(mix(vec3(0.5,0,0),vec3(1,0,0),vactive),1);
+      }
+    `,
+    vert: `
+      precision highp float;
+      attribute vec2 position;
+      attribute float active;
+      varying float vactive;
+      void main() {
+        vactive = active;
+        gl_Position = vec4(position,0,1);
+      }
+    `,
+    primitive: 'lines',
+    lineWidth: 2,
+    attributes: {
+      position: regl.prop('positions'),
+      active: regl.prop('active')
+    },
+    count: (context,props) => props.positions.length/2
   })
 }

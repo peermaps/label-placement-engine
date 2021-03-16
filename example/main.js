@@ -152,6 +152,16 @@ var labelEngine = require('../')({
         out.positions.data[out.positions.offset++] = ymax
         out.state++
       }
+    },
+    line: {
+      size: function (out) {
+        out.cells = 6
+        out.positions = 8
+        out.bounds = 8
+      },
+      initialState: 0,
+      write: function (out, f) {
+      }
     }
   }
 })
@@ -183,8 +193,6 @@ for (var i = 0; i < labels.length; i++) {
     counts.line += labels[i].points.length*2
   }
 }
-
-//setInterval(randomize, 1000)
 
 function randomize() {
   for (var i = 0; i < labels.length; i++) {
@@ -237,6 +245,7 @@ function update() {
   }
   var poffset = 0, aoffset = 0
   for (var i = 0; i < labels.length; i++) {
+    if (labels[i].type !== 'point') continue
     var bstart = labelEngine._offsets.bounds[i*2+0]
     var bend = labelEngine._offsets.bounds[i*2+1]
     var n = bend-bstart
@@ -249,11 +258,12 @@ function update() {
       bboxes.active[aoffset++] = labelEngine._visible[i]
     }
   }
+  var poffset = 0, aoffset = 0
   for (var i = 0; i < labels.length; i++) {
     if (labels[i].type !== 'point') continue
-    points.positions[i*2+0] = labels[i].point[0]
-    points.positions[i*2+1] = labels[i].point[1]
-    points.active[i] = labelEngine._visible[i]
+    points.positions[poffset++] = labels[i].point[0]
+    points.positions[poffset++] = labels[i].point[1]
+    points.active[aoffset++] = labelEngine._visible[i]
   }
   frame()
 }

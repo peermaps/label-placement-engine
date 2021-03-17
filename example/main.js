@@ -41,7 +41,6 @@ var labelEngine = require('../')({
         out.positions = 8
         out.bounds = 16
       },
-      initialState: 0,
       write: function (out, f) {
         var xmin, ymin, xmax, ymax
         // labelSize: [0,0], // dimensions of the label
@@ -49,7 +48,7 @@ var labelEngine = require('../')({
         // pointSize: [10,10], // size of the point
         // pointMargin: [5,5], // space around the point
         // pointSeparation: [10,10], // distance between the label and point
-        if (out.state === 0) { // top
+        if (out.index === 0) { // top
           xmin = f.point[0] - f.labelSize[0]/2
           xmax = f.point[0] + f.labelSize[0]/2
           ymin = f.point[1] + f.pointMargin[1]
@@ -70,7 +69,7 @@ var labelEngine = require('../')({
           out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
           out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
           out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
-        } else if (out.state === 1) { // bottom
+        } else if (out.index === 1) { // bottom
           xmin = f.point[0] - f.labelSize[0]/2
           xmax = f.point[0] + f.labelSize[0]/2
           ymin = f.point[1] - f.pointMargin[1] - f.labelSize[1]
@@ -91,7 +90,7 @@ var labelEngine = require('../')({
           out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
           out.bounds.data[out.bounds.offset++] = xmin - f.labelMargin[0]
           out.bounds.data[out.bounds.offset++] = ymax + f.labelMargin[1]
-        } else if (out.state === 2) { // right
+        } else if (out.index === 2) { // right
           xmin = f.point[0] + f.pointSize[0]/2 + f.pointMargin[0]
           xmax = f.point[0] + f.pointSize[0]/2 + f.pointMargin[0] + f.labelSize[0]
           ymin = f.point[1] - f.labelSize[1]/2
@@ -112,7 +111,7 @@ var labelEngine = require('../')({
           out.bounds.data[out.bounds.offset++] = f.point[1] + f.pointSize[1]/2 + f.pointMargin[1]
           out.bounds.data[out.bounds.offset++] = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
           out.bounds.data[out.bounds.offset++] = f.point[1] + f.pointSize[1]/2 + f.pointMargin[1]
-        } else if (out.state === 3) { // left
+        } else if (out.index === 3) { // left
           xmin = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0] - f.labelSize[0]
           xmax = f.point[0] - f.pointSize[0]/2 - f.pointMargin[0]
           ymin = f.point[1] - f.labelSize[1]/2
@@ -150,7 +149,6 @@ var labelEngine = require('../')({
         out.positions.data[out.positions.offset++] = ymax
         out.positions.data[out.positions.offset++] = xmin
         out.positions.data[out.positions.offset++] = ymax
-        out.state++
       }
     },
     line: {
@@ -213,10 +211,7 @@ var lines = {
   positions: new Float32Array(counts.line*2)
 }
 
-var bboxes = {
-  positions: null,
-  active: null
-}
+var bboxes = { positions: null, active: null, count: 0 }
 
 function update() {
   var m = Math.max(window.innerWidth,window.innerHeight)
@@ -235,9 +230,6 @@ function update() {
     labels[i].pointSeparation[1] = labels[i].pxPointSeparation[1]/h*2
   }
   labelEngine.update(labels)
-  for (var i = 0; i < 4; i++) {
-    if (labelEngine.step() === 0) break
-  }
 
   if (!bboxes.positions) {
     bboxes.positions = new Float32Array(labelEngine._buffers.bounds.length*2)
@@ -250,14 +242,15 @@ function update() {
     var bend = labelEngine._offsets.bounds[i*2+1]
     var n = bend-bstart
     for (var j = 0; j < n; j+=2) {
-      bboxes.positions[poffset++] = labelEngine._buffers.bounds[bstart+j+0]
-      bboxes.positions[poffset++] = labelEngine._buffers.bounds[bstart+j+1]
-      bboxes.positions[poffset++] = labelEngine._buffers.bounds[bstart+(j+2)%n+0]
-      bboxes.positions[poffset++] = labelEngine._buffers.bounds[bstart+(j+2)%n+1]
+      bboxes.positions[poffset++] = labelEngine.data.bounds[bstart+j+0]
+      bboxes.positions[poffset++] = labelEngine.data.bounds[bstart+j+1]
+      bboxes.positions[poffset++] = labelEngine.data.bounds[bstart+(j+2)%n+0]
+      bboxes.positions[poffset++] = labelEngine.data.bounds[bstart+(j+2)%n+1]
       bboxes.active[aoffset++] = labelEngine._visible[i]
       bboxes.active[aoffset++] = labelEngine._visible[i]
     }
   }
+  bboxes.count = poffset/2
   var poffset = 0, aoffset = 0
   for (var i = 0; i < labels.length; i++) {
     if (labels[i].type !== 'point') continue
@@ -367,6 +360,6 @@ function bbox(regl) {
       position: regl.prop('positions'),
       active: regl.prop('active')
     },
-    count: (context,props) => props.positions.length/2
+    count: regl.prop('count')
   })
 }

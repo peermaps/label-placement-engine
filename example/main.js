@@ -167,7 +167,7 @@ var labelEngine = require('../')({
 var labels = [
   { type: 'bounds', bounds: [-1,-1,+1,+1] }
 ]
-for (var i = 0; i < 150; i++) {
+for (var i = 0; i < 250; i++) {
   labels.push({
     type: 'point',
     pxLabelSize: [0,0], // dimensions of the label
@@ -232,8 +232,8 @@ function update() {
   labelEngine.update(labels)
 
   if (!bboxes.positions) {
-    bboxes.positions = new Float32Array(labelEngine._buffers.bounds.length*2)
-    bboxes.active = new Float32Array(labelEngine._buffers.bounds.length)
+    bboxes.positions = new Float32Array(labelEngine.data.bounds.length*2)
+    bboxes.active = new Float32Array(labelEngine.data.bounds.length)
   }
   var poffset = 0, aoffset = 0
   for (var i = 0; i < labels.length; i++) {
@@ -273,7 +273,7 @@ window.addEventListener('resize', update)
 function frame() {
   regl.poll()
   regl.clear({ color: [0,0,0,1], depth: true })
-  draw.box(labelEngine.data)
+  draw.box(labelEngine)
   draw.point(points)
   draw.bbox(bboxes)
 }
@@ -299,10 +299,11 @@ function box(regl) {
       }
     `,
     attributes: {
-      position: regl.prop('positions'),
-      visible: regl.prop('visible')
+      position: regl.prop('data.positions'),
+      visible: regl.prop('data.visible')
     },
-    elements: regl.prop('cells')
+    elements: regl.prop('data.cells'),
+    count: regl.prop('count.cells')
   })
 }
 

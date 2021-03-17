@@ -1,5 +1,6 @@
 var regl = require('regl')()
 var labelEngine = require('../')({
+  outlines: true,
   types: {
     bounds: {
       size: function (out) {
@@ -211,8 +212,6 @@ var lines = {
   positions: new Float32Array(counts.line*2)
 }
 
-var bboxes = { positions: null, active: null, count: 0 }
-
 function update() {
   var m = Math.max(window.innerWidth,window.innerHeight)
   var w = window.innerWidth, h = window.innerHeight
@@ -231,26 +230,6 @@ function update() {
   }
   labelEngine.update(labels)
 
-  if (!bboxes.positions) {
-    bboxes.positions = new Float32Array(labelEngine.data.bounds.length*2)
-    bboxes.active = new Float32Array(labelEngine.data.bounds.length)
-  }
-  var poffset = 0, aoffset = 0
-  for (var i = 0; i < labels.length; i++) {
-    if (labels[i].type !== 'point') continue
-    var bstart = labelEngine._offsets.bounds[i*2+0]
-    var bend = labelEngine._offsets.bounds[i*2+1]
-    var n = bend-bstart
-    for (var j = 0; j < n; j+=2) {
-      bboxes.positions[poffset++] = labelEngine.data.bounds[bstart+j+0]
-      bboxes.positions[poffset++] = labelEngine.data.bounds[bstart+j+1]
-      bboxes.positions[poffset++] = labelEngine.data.bounds[bstart+(j+2)%n+0]
-      bboxes.positions[poffset++] = labelEngine.data.bounds[bstart+(j+2)%n+1]
-      bboxes.active[aoffset++] = labelEngine._visible[i]
-      bboxes.active[aoffset++] = labelEngine._visible[i]
-    }
-  }
-  bboxes.count = poffset/2
   var poffset = 0, aoffset = 0
   for (var i = 0; i < labels.length; i++) {
     if (labels[i].type !== 'point') continue
@@ -263,7 +242,7 @@ function update() {
 
 var draw = {
   point: point(regl),
-  bbox: bbox(regl),
+  outlines: outlines(regl),
   box: box(regl),
 }
 randomize()
@@ -275,7 +254,7 @@ function frame() {
   regl.clear({ color: [0,0,0,1], depth: true })
   draw.box(labelEngine)
   draw.point(points)
-  draw.bbox(bboxes)
+  draw.outlines(labelEngine)
 }
 
 function box(regl) {
@@ -336,31 +315,26 @@ function point(regl) {
   })
 }
 
-function bbox(regl) {
+function outlines(regl) {
   return regl({
     frag: `
       precision highp float;
-      varying float vactive;
       void main() {
-        gl_FragColor = vec4(mix(vec3(0.5,0,0),vec3(1,0,0),vactive),1);
+        gl_FragColor = vec4(1,0,0,1);
       }
     `,
     vert: `
       precision highp float;
       attribute vec2 position;
-      attribute float active;
-      varying float vactive;
       void main() {
-        vactive = active;
         gl_Position = vec4(position,0,1);
       }
     `,
     primitive: 'lines',
     lineWidth: 2,
     attributes: {
-      position: regl.prop('positions'),
-      active: regl.prop('active')
+      position: regl.prop('data.outlines')
     },
-    count: regl.prop('count')
+    count: regl.prop('count.outlines')
   })
 }

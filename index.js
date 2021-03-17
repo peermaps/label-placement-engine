@@ -8,19 +8,22 @@ function LabelMaker (opts) {
   if (!opts) opts = {}
   this._cellType = opts.cellType || 'u16'
   this._types = opts.types || {}
+  this._outlines = opts.outlines !== undefined ? opts.outlines : false
   this.data = {
     positions: null,
     cells: null,
     visible: null,
     labels: null,
     bounds: null,
-    bbox: null
+    bbox: null,
+    outlines: null
   }
   this.count = {
     positions: 0,
     cells: 0,
     bounds: 0,
-    bbox: 0
+    bbox: 0,
+    outlines: 0
   }
   this._dst = {
     positions: { offset: 0, data: null },
@@ -67,6 +70,9 @@ LabelMaker.prototype.update = function (features) {
   if (!this.data.bounds || blen > this.data.bounds.length) {
     this.data.bounds = new Float32Array(blen)
   }
+  if (this._outlines && (!this.data.outlines || blen*2 > this.data.outlines.length)) {
+    this.data.outlines = new Float32Array(blen*2)
+  }
   if (!this.data.bbox || features.length * 4 > this.data.bbox.length) {
     this.data.bbox = new Float32Array(features.length*4)
   }
@@ -88,13 +94,14 @@ LabelMaker.prototype.update = function (features) {
 }
 
 LabelMaker.prototype._step = function () {
-  var plen = 0, clen = 0
+  var plen = 0, clen = 0, ooffset = 0
   this._dst.positions.offset = 0
   this._dst.positions.data = this.data.positions
   this._dst.cells.offset = 0
   this._dst.cells.data = this.data.cells
   this._dst.bounds.offset = 0
   this._dst.bounds.data = this.data.bounds
+
   for (var i = 0; i < this._features.length; i++) {
     var f = this._features[i]
     var t = this._types[f.type]
@@ -175,11 +182,21 @@ LabelMaker.prototype._step = function () {
         this.data.labels[j] = i
       }
     }
+    if (this._outlines && this._visible[i] > 0.5) {
+      var n = bend-bstart
+      for (var j = 0; j < n; j+=2) {
+        this.data.outlines[ooffset++] = this.data.bounds[bstart+j+0]
+        this.data.outlines[ooffset++] = this.data.bounds[bstart+j+1]
+        this.data.outlines[ooffset++] = this.data.bounds[bstart+(j+2)%n+0]
+        this.data.outlines[ooffset++] = this.data.bounds[bstart+(j+2)%n+1]
+      }
+    }
   }
 
   this.count.positions = this._dst.positions.offset/2
   this.count.cells = this._dst.cells.offset
   this.count.bounds = this._dst.bounds.offset/2
+  this.count.outlines = ooffset/2
 }
 
 function boxOverlap(ai, a, bi, b) {

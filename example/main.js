@@ -261,25 +261,19 @@ function box(regl) {
   return regl({
     frag: `
       precision highp float;
-      varying float vvisible;
       void main() {
-        if (vvisible < 0.5) discard;
         gl_FragColor = vec4(0.5,0.5,0.5,1);
       }
     `,
     vert: `
       precision highp float;
       attribute vec2 position;
-      attribute float visible;
-      varying float vvisible;
       void main() {
-        vvisible = visible;
         gl_Position = vec4(position,0,1);
       }
     `,
     attributes: {
-      position: regl.prop('data.positions'),
-      visible: regl.prop('data.visible')
+      position: regl.prop('data.positions')
     },
     elements: regl.prop('data.cells'),
     count: regl.prop('count.cells')

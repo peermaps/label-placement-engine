@@ -12,7 +12,6 @@ function LabelMaker (opts) {
   this.data = {
     positions: null,
     cells: null,
-    visible: null,
     labels: null,
     bounds: null,
     bbox: null,
@@ -31,7 +30,7 @@ function LabelMaker (opts) {
     bounds: { offset: 0, data: null }
   }
   this._visible = null
-  this._offsets = { bounds: null, positions: null, cells: null }
+  this._offsets = { bounds: null }
   this._size = { positions: 0, cells: 0, bounds: 0 }
 }
 
@@ -53,9 +52,6 @@ LabelMaker.prototype.update = function (features) {
   if (!this.data.positions || plen > this.data.positions.length) {
     this.data.positions = new Float32Array(plen)
     this.data.labels = new Float32Array(plen/2)
-    this.data.visible = new Float32Array(plen/2)
-  } else {
-    this.data.visible.fill(0)
   }
   if (!this.data.cells || clen > this.data.cells.length) {
     var F = {
@@ -83,12 +79,6 @@ LabelMaker.prototype.update = function (features) {
   }
   if (!this._offsets.bounds || features.length*2 > this._offsets.bounds.length) {
     this._offsets.bounds = new Float32Array(features.length*2)
-  }
-  if (!this._offsets.positions || features.length*2 > this._offsets.positions.length) {
-    this._offsets.positions = new Float32Array(features.length*2)
-  }
-  if (!this._offsets.cells || features.length*2 > this._offsets.cells.length) {
-    this._offsets.cells = new Float32Array(features.length*2)
   }
   this._step()
 }
@@ -176,11 +166,6 @@ LabelMaker.prototype._step = function () {
       this._dst.bounds.offset = bstart
       this._offsets.bounds[i*2+0] = bstart
       this._offsets.bounds[i*2+1] = bstart
-    } else {
-      for (var j = pstart/2; j < pend/2; j++) {
-        this.data.visible[j] = visible ? 1 : 0
-        this.data.labels[j] = i
-      }
     }
     if (this._outlines && this._visible[i] > 0.5) {
       var n = bend-bstart

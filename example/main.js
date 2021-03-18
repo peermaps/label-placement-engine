@@ -3,7 +3,7 @@ var labelEngine = require('../')({
   outlines: true,
   types: {
     bounds: {
-      size: function (out) {
+      size: function (out, f) {
         out.cells = 0
         out.positions = 0
         out.bounds = 20
@@ -37,7 +37,7 @@ var labelEngine = require('../')({
       }
     },
     point: {
-      size: function (out) {
+      size: function (out, f) {
         out.cells = 6
         out.positions = 8
         out.bounds = 16
@@ -153,22 +153,83 @@ var labelEngine = require('../')({
       }
     },
     line: {
-      size: function (out) {
+      size: function (out, f) {
         out.cells = 6
         out.positions = 8
         out.bounds = 8
       },
-      initialState: 0,
       write: function (out, f) {
+        if (out.index > 0) return
+        //var i = Math.floor((f.positions.length-1)/2)
+        var i = 1
+        var dx = f.positions[i*2+0]-f.positions[i*2+2]
+        var dy = f.positions[i*2+1]-f.positions[i*2+3]
+        var theta = Math.atan2(dy,dx)
+        var s = Math.sin(theta), c = Math.cos(theta)
+        var cx = (f.positions[i*2+0]+f.positions[i*2+2])/2
+        var cy = (f.positions[i*2+1]+f.positions[i*2+3])/2
+        var x0 = cx - 0.2
+        var x1 = cx + 0.2
+        var y0 = cy - 0.05
+        var y1 = cy + 0.05
+        rotate(v0, cx, cy, s, c, x0, y0)
+        rotate(v1, cx, cy, s, c, x1, y0)
+        rotate(v2, cx, cy, s, c, x1, y1)
+        rotate(v3, cx, cy, s, c, x0, y1)
+        out.positions.data[out.positions.offset++] = v0[0]
+        out.positions.data[out.positions.offset++] = v0[1]
+        out.positions.data[out.positions.offset++] = v1[0]
+        out.positions.data[out.positions.offset++] = v1[1]
+        out.positions.data[out.positions.offset++] = v2[0]
+        out.positions.data[out.positions.offset++] = v2[1]
+        out.positions.data[out.positions.offset++] = v3[0]
+        out.positions.data[out.positions.offset++] = v3[1]
+
+        var px = 0.02, py = 0.02
+        x0 -= px
+        x1 += px
+        y0 -= py
+        y1 += py
+        rotate(v0, cx, cy, s, c, x0, y0)
+        rotate(v1, cx, cy, s, c, x1, y0)
+        rotate(v2, cx, cy, s, c, x1, y1)
+        rotate(v3, cx, cy, s, c, x0, y1)
+        out.bounds.data[out.bounds.offset++] = v0[0]
+        out.bounds.data[out.bounds.offset++] = v0[1]
+        out.bounds.data[out.bounds.offset++] = v1[0]
+        out.bounds.data[out.bounds.offset++] = v1[1]
+        out.bounds.data[out.bounds.offset++] = v2[0]
+        out.bounds.data[out.bounds.offset++] = v2[1]
+        out.bounds.data[out.bounds.offset++] = v3[0]
+        out.bounds.data[out.bounds.offset++] = v3[1]
+
+        out.cells.data[out.cells.offset++] = 0
+        out.cells.data[out.cells.offset++] = 1
+        out.cells.data[out.cells.offset++] = 2
+        out.cells.data[out.cells.offset++] = 0
+        out.cells.data[out.cells.offset++] = 2
+        out.cells.data[out.cells.offset++] = 3
       }
     }
   }
 })
 
-var labels = [
-  { type: 'bounds', bounds: [-1,-1,+1,+1] }
-]
-for (var i = 0; i < 250; i++) {
+var v0 = [0,0]
+var v1 = [0,0]
+var v2 = [0,0]
+var v3 = [0,0]
+function rotate(out, cx, cy, s, c, x, y) {
+  out[0] = x - cx
+  out[1] = y - cy
+  var xn = x*c - y*s
+  var yn = x*s + y*c
+  out[0] = xn + cx
+  out[1] = yn + cy
+  return out
+}
+
+var labels = [ { type: 'bounds', bounds: [-1,-1,+1,+1] } ]
+for (var i = 0; i < 10; i++) {
   labels.push({
     type: 'point',
     pxLabelSize: [0,0], // dimensions of the label
@@ -184,12 +245,37 @@ for (var i = 0; i < 250; i++) {
     pointSeparation: [0,0]
   })
 }
+
+labels.push((function () {
+  var positions = [
+    -0.2,-1.0,
+    +0.1,-0.5,
+    +0.0,+0.4,
+    +0.4,+0.5,
+    +0.7,+0.8,
+    +0.6,+1.0
+  ]
+  var line = new Float32Array(positions.length*4)
+  var offset = 0
+  for (var i = 0; i < positions.length-2; i+=2) {
+    line[offset++] = positions[i+0]
+    line[offset++] = positions[i+1]
+    line[offset++] = positions[i+2]
+    line[offset++] = positions[i+3]
+  }
+  return {
+    type: 'line',
+    positions,
+    line,
+  }
+})())
+
 var counts = { point: 0, line: 0 }
 for (var i = 0; i < labels.length; i++) {
   if (labels[i].type === 'point') {
     counts.point++
   } else if (labels[i].type === 'line') {
-    counts.line += labels[i].points.length*2
+    counts.line += labels[i].line.length
   }
 }
 
@@ -209,8 +295,10 @@ var points = {
   active: new Float32Array(counts.point)
 }
 var lines = {
-  positions: new Float32Array(counts.line*2)
+  positions: new Float32Array(counts.line*2),
+  count: { outlines: counts.line }
 }
+lines.data = { outlines: lines.positions }
 
 function update() {
   var m = Math.max(window.innerWidth,window.innerHeight)
@@ -230,19 +318,29 @@ function update() {
   }
   labelEngine.update(labels)
 
-  var poffset = 0, aoffset = 0
+  var poffset = 0, aoffset = 0, loffset = 0
   for (var i = 0; i < labels.length; i++) {
-    if (labels[i].type !== 'point') continue
-    points.positions[poffset++] = labels[i].point[0]
-    points.positions[poffset++] = labels[i].point[1]
-    points.active[aoffset++] = labelEngine._visible[i]
+    if (labels[i].type === 'point') {
+      points.positions[poffset++] = labels[i].point[0]
+      points.positions[poffset++] = labels[i].point[1]
+      points.active[aoffset++] = labelEngine._visible[i]
+    } else if (labels[i].type === 'line') {
+      for (var j = 0; j < labels[i].positions.length-2; j+=2) {
+        lines.positions[loffset++] = labels[i].positions[j+0]
+        lines.positions[loffset++] = labels[i].positions[j+1]
+        lines.positions[loffset++] = labels[i].positions[j+2]
+        lines.positions[loffset++] = labels[i].positions[j+3]
+      }
+      counts.line += labels[i].positions.length/2
+    }
   }
   frame()
 }
 
 var draw = {
   point: point(regl),
-  outlines: outlines(regl),
+  outlines: outlines(regl, [1,0,0]),
+  lines: outlines(regl, [0,0.5,0.5]),
   box: box(regl),
 }
 randomize()
@@ -255,6 +353,7 @@ function frame() {
   draw.box(labelEngine)
   draw.point(points)
   draw.outlines(labelEngine)
+  draw.lines(lines)
 }
 
 function box(regl) {
@@ -309,12 +408,13 @@ function point(regl) {
   })
 }
 
-function outlines(regl) {
+function outlines(regl, color) {
   return regl({
     frag: `
       precision highp float;
+      uniform vec3 color;
       void main() {
-        gl_FragColor = vec4(1,0,0,1);
+        gl_FragColor = vec4(color,1);
       }
     `,
     vert: `
@@ -329,6 +429,7 @@ function outlines(regl) {
     attributes: {
       position: regl.prop('data.outlines')
     },
+    uniforms: { color },
     count: regl.prop('count.outlines')
   })
 }

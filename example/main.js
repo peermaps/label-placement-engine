@@ -162,30 +162,33 @@ var labelEngine = require('../')({
         if (out.index > 0) return
         //var i = Math.floor((f.positions.length-1)/2)
         var i = 1
-        var dx = f.positions[i*2+0]-f.positions[i*2+2]
-        var dy = f.positions[i*2+1]-f.positions[i*2+3]
+        var dx = (f.positions[i*2+0]-f.positions[i*2+2])*f.width
+        var dy = (f.positions[i*2+1]-f.positions[i*2+3])*f.height
         var theta = Math.atan2(dy,dx)
         var s = Math.sin(theta), c = Math.cos(theta)
-        var cx = (f.positions[i*2+0]+f.positions[i*2+2])/2
-        var cy = (f.positions[i*2+1]+f.positions[i*2+3])/2
-        var x0 = cx - 0.2
-        var x1 = cx + 0.2
-        var y0 = cy - 0.05
-        var y1 = cy + 0.05
+        var cx = (f.positions[i*2+0]+f.positions[i*2+2])/2*f.width
+        var cy = (f.positions[i*2+1]+f.positions[i*2+3])/2*f.height
+        var lsx = f.pxLabelSize[0]
+        var lsy = f.pxLabelSize[1]
+        var x0 = cx - lsx
+        var x1 = cx + lsx
+        var y0 = cy - lsy
+        var y1 = cy + lsy
         rotate(v0, cx, cy, s, c, x0, y0)
         rotate(v1, cx, cy, s, c, x1, y0)
         rotate(v2, cx, cy, s, c, x1, y1)
         rotate(v3, cx, cy, s, c, x0, y1)
-        out.positions.data[out.positions.offset++] = v0[0]
-        out.positions.data[out.positions.offset++] = v0[1]
-        out.positions.data[out.positions.offset++] = v1[0]
-        out.positions.data[out.positions.offset++] = v1[1]
-        out.positions.data[out.positions.offset++] = v2[0]
-        out.positions.data[out.positions.offset++] = v2[1]
-        out.positions.data[out.positions.offset++] = v3[0]
-        out.positions.data[out.positions.offset++] = v3[1]
+        out.positions.data[out.positions.offset++] = v0[0]/f.width
+        out.positions.data[out.positions.offset++] = v0[1]/f.height
+        out.positions.data[out.positions.offset++] = v1[0]/f.width
+        out.positions.data[out.positions.offset++] = v1[1]/f.height
+        out.positions.data[out.positions.offset++] = v2[0]/f.width
+        out.positions.data[out.positions.offset++] = v2[1]/f.height
+        out.positions.data[out.positions.offset++] = v3[0]/f.width
+        out.positions.data[out.positions.offset++] = v3[1]/f.height
 
-        var px = 0.02, py = 0.02
+        var px = f.pxLabelMargin[0]*2
+        var py = f.pxLabelMargin[1]*2
         x0 -= px
         x1 += px
         y0 -= py
@@ -194,14 +197,14 @@ var labelEngine = require('../')({
         rotate(v1, cx, cy, s, c, x1, y0)
         rotate(v2, cx, cy, s, c, x1, y1)
         rotate(v3, cx, cy, s, c, x0, y1)
-        out.bounds.data[out.bounds.offset++] = v0[0]
-        out.bounds.data[out.bounds.offset++] = v0[1]
-        out.bounds.data[out.bounds.offset++] = v1[0]
-        out.bounds.data[out.bounds.offset++] = v1[1]
-        out.bounds.data[out.bounds.offset++] = v2[0]
-        out.bounds.data[out.bounds.offset++] = v2[1]
-        out.bounds.data[out.bounds.offset++] = v3[0]
-        out.bounds.data[out.bounds.offset++] = v3[1]
+        out.bounds.data[out.bounds.offset++] = v0[0]/f.width
+        out.bounds.data[out.bounds.offset++] = v0[1]/f.height
+        out.bounds.data[out.bounds.offset++] = v1[0]/f.width
+        out.bounds.data[out.bounds.offset++] = v1[1]/f.height
+        out.bounds.data[out.bounds.offset++] = v2[0]/f.width
+        out.bounds.data[out.bounds.offset++] = v2[1]/f.height
+        out.bounds.data[out.bounds.offset++] = v3[0]/f.width
+        out.bounds.data[out.bounds.offset++] = v3[1]/f.height
 
         out.cells.data[out.cells.offset++] = 0
         out.cells.data[out.cells.offset++] = 1
@@ -221,34 +224,18 @@ var v3 = [0,0]
 function rotate(out, cx, cy, s, c, x, y) {
   out[0] = x - cx
   out[1] = y - cy
-  var xn = x*c - y*s
-  var yn = x*s + y*c
+  var xn = out[0]*c - out[1]*s
+  var yn = out[0]*s + out[1]*c
   out[0] = xn + cx
   out[1] = yn + cy
   return out
 }
 
 var labels = [ { type: 'bounds', bounds: [-1,-1,+1,+1] } ]
-for (var i = 0; i < 10; i++) {
-  labels.push({
-    type: 'point',
-    pxLabelSize: [0,0], // dimensions of the label
-    pxLabelMargin: [10,10], // space around the label
-    pxPointSize: [10,10], // size of the point
-    pxPointMargin: [10,10], // space around the point
-    pxPointSeparation: [10,10], // distance between the label and point
-    labelSize: [0,0],
-    labelMargin: [0,0],
-    pointSize: [0,0],
-    pointMargin: [0,0],
-    point:[0,0],
-    pointSeparation: [0,0]
-  })
-}
 
 labels.push((function () {
   var positions = [
-    -0.2,-1.0,
+    +0.3,-1.0,
     +0.1,-0.5,
     +0.0,+0.4,
     +0.4,+0.5,
@@ -265,10 +252,33 @@ labels.push((function () {
   }
   return {
     type: 'line',
-    positions,
-    line,
+    positions: positions,
+    line: line,
+    pxLabelSize: [100,20],
+    pxLabelMargin: [10,10],
+    labelSize: [0,0],
+    labelMargin: [0,0],
+    width: 0,
+    height: 0
   }
 })())
+
+for (var i = 0; i < 25; i++) {
+  labels.push({
+    type: 'point',
+    pxLabelSize: [0,0], // dimensions of the label
+    pxLabelMargin: [10,10], // space around the label
+    pxPointSize: [10,10], // size of the point
+    pxPointMargin: [10,10], // space around the point
+    pxPointSeparation: [10,10], // distance between the label and point
+    labelSize: [0,0],
+    labelMargin: [0,0],
+    pointSize: [0,0],
+    pointMargin: [0,0],
+    point:[0,0],
+    pointSeparation: [0,0]
+  })
+}
 
 var counts = { point: 0, line: 0 }
 for (var i = 0; i < labels.length; i++) {
@@ -304,17 +314,25 @@ function update() {
   var m = Math.max(window.innerWidth,window.innerHeight)
   var w = window.innerWidth, h = window.innerHeight
   for (var i = 0; i < labels.length; i++) {
-    if (labels[i].type !== 'point') continue
-    labels[i].labelSize[0] = labels[i].pxLabelSize[0]/w*2
-    labels[i].labelSize[1] = labels[i].pxLabelSize[1]/h*2
-    labels[i].labelMargin[0] = labels[i].pxLabelMargin[0]/w*2
-    labels[i].labelMargin[1] = labels[i].pxLabelMargin[1]/h*2
-    labels[i].pointSize[0] = labels[i].pxPointSize[0]/w*2
-    labels[i].pointSize[1] = labels[i].pxPointSize[1]/h*2
-    labels[i].pointMargin[0] = labels[i].pxPointMargin[0]/w*2
-    labels[i].pointMargin[1] = labels[i].pxPointMargin[1]/h*2
-    labels[i].pointSeparation[0] = labels[i].pxPointSeparation[0]/w*2
-    labels[i].pointSeparation[1] = labels[i].pxPointSeparation[1]/h*2
+    if (labels[i].type === 'point') {
+      labels[i].labelSize[0] = labels[i].pxLabelSize[0]/w*2
+      labels[i].labelSize[1] = labels[i].pxLabelSize[1]/h*2
+      labels[i].labelMargin[0] = labels[i].pxLabelMargin[0]/w*2
+      labels[i].labelMargin[1] = labels[i].pxLabelMargin[1]/h*2
+      labels[i].pointSize[0] = labels[i].pxPointSize[0]/w*2
+      labels[i].pointSize[1] = labels[i].pxPointSize[1]/h*2
+      labels[i].pointMargin[0] = labels[i].pxPointMargin[0]/w*2
+      labels[i].pointMargin[1] = labels[i].pxPointMargin[1]/h*2
+      labels[i].pointSeparation[0] = labels[i].pxPointSeparation[0]/w*2
+      labels[i].pointSeparation[1] = labels[i].pxPointSeparation[1]/h*2
+    } else if (labels[i].type === 'line') {
+      labels[i].labelSize[0] = labels[i].pxLabelSize[0]/w*2
+      labels[i].labelSize[1] = labels[i].pxLabelSize[1]/h*2
+      labels[i].labelMargin[0] = labels[i].pxLabelMargin[0]/w*2
+      labels[i].labelMargin[1] = labels[i].pxLabelMargin[1]/h*2
+      labels[i].width = w
+      labels[i].height = h
+    }
   }
   labelEngine.update(labels)
 

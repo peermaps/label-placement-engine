@@ -159,9 +159,9 @@ var labelEngine = require('../')({
         out.bounds = 8
       },
       write: function (out, f) {
-        if (out.index > 0) return
-        //var i = Math.floor((f.positions.length-1)/2)
-        var i = 1
+        var i = Math.floor((f.positions.length/2-1)/2)
+          + Math.floor((out.index+1)/2) * ((out.index%2)*2-1)
+        if (i*2 >= f.positions.length) return
         var dx = (f.positions[i*2+0]-f.positions[i*2+2])*f.aspect
         var dy = (f.positions[i*2+1]-f.positions[i*2+3])
         var theta = Math.atan2(dy,dx)
@@ -232,6 +232,22 @@ function rotate(out, cx, cy, s, c, x, y) {
 }
 
 var labels = [ { type: 'bounds', bounds: [-1,-1,+1,+1] } ]
+for (var i = 0; i < 25; i++) {
+  labels.push({
+    type: 'point',
+    pxLabelSize: [0,0], // dimensions of the label
+    pxLabelMargin: [10,10], // space around the label
+    pxPointSize: [10,10], // size of the point
+    pxPointMargin: [10,10], // space around the point
+    pxPointSeparation: [10,10], // distance between the label and point
+    labelSize: [0,0],
+    labelMargin: [0,0],
+    pointSize: [0,0],
+    pointMargin: [0,0],
+    point:[0,0],
+    pointSeparation: [0,0]
+  })
+}
 
 labels.push((function () {
   var positions = [
@@ -262,23 +278,6 @@ labels.push((function () {
     height: 0
   }
 })())
-
-for (var i = 0; i < 25; i++) {
-  labels.push({
-    type: 'point',
-    pxLabelSize: [0,0], // dimensions of the label
-    pxLabelMargin: [10,10], // space around the label
-    pxPointSize: [10,10], // size of the point
-    pxPointMargin: [10,10], // space around the point
-    pxPointSeparation: [10,10], // distance between the label and point
-    labelSize: [0,0],
-    labelMargin: [0,0],
-    pointSize: [0,0],
-    pointMargin: [0,0],
-    point:[0,0],
-    pointSeparation: [0,0]
-  })
-}
 
 var counts = { point: 0, line: 0 }
 for (var i = 0; i < labels.length; i++) {

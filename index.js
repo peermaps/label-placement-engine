@@ -1,5 +1,6 @@
-var polygonOverlap = require('./lib/polygon-overlap.js')
+var polygonIntersect = require('polygon-intersect-test')
 var bbox = [0,0,0,0]
+var irange = [0,0], jrange = [0,0]
 
 module.exports = LabelMaker
 
@@ -141,14 +142,16 @@ LabelMaker.prototype._step = function () {
       this.data.bbox[i*4+2] = bbox[2]
       this.data.bbox[i*4+3] = bbox[3]
 
+      irange[0] = bstart
+      irange[1] = bend
       if (visible) {
         for (var j = 0; j < i; j++) {
           if (j === i) continue
           if (this._visible[j] < 0.5) continue
           if (boxOverlap(i*4,this.data.bbox,j*4,this.data.bbox)) {
-            var jbs = this._offsets.bounds[j*2+0]
-            var jbe = this._offsets.bounds[j*2+1]
-            if (polygonOverlap(bstart,bend,this.data.bounds,jbs,jbe,this.data.bounds)) {
+            jrange[0] = this._offsets.bounds[j*2+0]
+            jrange[1] = this._offsets.bounds[j*2+1]
+            if (polygonIntersect(this.data.bounds,this.data.bounds,irange,jrange)) {
               visible = false
               break
             }

@@ -162,14 +162,14 @@ var labelEngine = require('../')({
         if (out.index > 0) return
         //var i = Math.floor((f.positions.length-1)/2)
         var i = 1
-        var dx = (f.positions[i*2+0]-f.positions[i*2+2])*f.width
-        var dy = (f.positions[i*2+1]-f.positions[i*2+3])*f.height
+        var dx = (f.positions[i*2+0]-f.positions[i*2+2])*f.aspect
+        var dy = (f.positions[i*2+1]-f.positions[i*2+3])
         var theta = Math.atan2(dy,dx)
         var s = Math.sin(theta), c = Math.cos(theta)
-        var cx = (f.positions[i*2+0]+f.positions[i*2+2])/2*f.width
-        var cy = (f.positions[i*2+1]+f.positions[i*2+3])/2*f.height
-        var lsx = f.pxLabelSize[0]
-        var lsy = f.pxLabelSize[1]
+        var cx = (f.positions[i*2+0]+f.positions[i*2+2])/2*f.aspect
+        var cy = (f.positions[i*2+1]+f.positions[i*2+3])/2
+        var lsx = f.labelSize[0]*f.aspect/2
+        var lsy = f.labelSize[1]/2
         var x0 = cx - lsx
         var x1 = cx + lsx
         var y0 = cy - lsy
@@ -178,17 +178,17 @@ var labelEngine = require('../')({
         rotate(v1, cx, cy, s, c, x1, y0)
         rotate(v2, cx, cy, s, c, x1, y1)
         rotate(v3, cx, cy, s, c, x0, y1)
-        out.positions.data[out.positions.offset++] = v0[0]/f.width
-        out.positions.data[out.positions.offset++] = v0[1]/f.height
-        out.positions.data[out.positions.offset++] = v1[0]/f.width
-        out.positions.data[out.positions.offset++] = v1[1]/f.height
-        out.positions.data[out.positions.offset++] = v2[0]/f.width
-        out.positions.data[out.positions.offset++] = v2[1]/f.height
-        out.positions.data[out.positions.offset++] = v3[0]/f.width
-        out.positions.data[out.positions.offset++] = v3[1]/f.height
+        out.positions.data[out.positions.offset++] = v0[0]/f.aspect
+        out.positions.data[out.positions.offset++] = v0[1]
+        out.positions.data[out.positions.offset++] = v1[0]/f.aspect
+        out.positions.data[out.positions.offset++] = v1[1]
+        out.positions.data[out.positions.offset++] = v2[0]/f.aspect
+        out.positions.data[out.positions.offset++] = v2[1]
+        out.positions.data[out.positions.offset++] = v3[0]/f.aspect
+        out.positions.data[out.positions.offset++] = v3[1]
 
-        var px = f.pxLabelMargin[0]*2
-        var py = f.pxLabelMargin[1]*2
+        var px = f.labelMargin[0]*f.aspect
+        var py = f.labelMargin[1]
         x0 -= px
         x1 += px
         y0 -= py
@@ -197,14 +197,14 @@ var labelEngine = require('../')({
         rotate(v1, cx, cy, s, c, x1, y0)
         rotate(v2, cx, cy, s, c, x1, y1)
         rotate(v3, cx, cy, s, c, x0, y1)
-        out.bounds.data[out.bounds.offset++] = v0[0]/f.width
-        out.bounds.data[out.bounds.offset++] = v0[1]/f.height
-        out.bounds.data[out.bounds.offset++] = v1[0]/f.width
-        out.bounds.data[out.bounds.offset++] = v1[1]/f.height
-        out.bounds.data[out.bounds.offset++] = v2[0]/f.width
-        out.bounds.data[out.bounds.offset++] = v2[1]/f.height
-        out.bounds.data[out.bounds.offset++] = v3[0]/f.width
-        out.bounds.data[out.bounds.offset++] = v3[1]/f.height
+        out.bounds.data[out.bounds.offset++] = v0[0]/f.aspect
+        out.bounds.data[out.bounds.offset++] = v0[1]
+        out.bounds.data[out.bounds.offset++] = v1[0]/f.aspect
+        out.bounds.data[out.bounds.offset++] = v1[1]
+        out.bounds.data[out.bounds.offset++] = v2[0]/f.aspect
+        out.bounds.data[out.bounds.offset++] = v2[1]
+        out.bounds.data[out.bounds.offset++] = v3[0]/f.aspect
+        out.bounds.data[out.bounds.offset++] = v3[1]
 
         out.cells.data[out.cells.offset++] = 0
         out.cells.data[out.cells.offset++] = 1
@@ -330,8 +330,7 @@ function update() {
       labels[i].labelSize[1] = labels[i].pxLabelSize[1]/h*2
       labels[i].labelMargin[0] = labels[i].pxLabelMargin[0]/w*2
       labels[i].labelMargin[1] = labels[i].pxLabelMargin[1]/h*2
-      labels[i].width = w
-      labels[i].height = h
+      labels[i].aspect = w/h
     }
   }
   labelEngine.update(labels)

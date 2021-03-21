@@ -1,9 +1,11 @@
+var defaultScale = [1,1]
 var v0 = [0,0]
 var v1 = [0,0]
 var v2 = [0,0]
 var v3 = [0,0]
 
-module.exports = function () {
+module.exports = function (params) {
+  if (!params) params = {}
   return {
     size: function (out, f) {
       out.cells = 6
@@ -14,14 +16,33 @@ module.exports = function () {
       var i = Math.floor((f.positions.length/2-1)/2)
         + Math.floor((out.index+1)/2) * ((out.index%2)*2-1)
       if (i*2 >= f.positions.length) return
-      var dx = (f.positions[i*2+0]-f.positions[i*2+2])*f.aspect
-      var dy = (f.positions[i*2+1]-f.positions[i*2+3])
+
+      var scale = f.scale || params.scale || defaultScale
+
+      var positions = f.positions || params.positions
+      var positionsScale = f.positionsScale || params.positionsScale || scale
+      var p0 = positions[i*2+0]*positionsScale[0]
+      var p1 = positions[i*2+1]*positionsScale[1]
+      var p2 = positions[i*2+2]*positionsScale[0]
+      var p3 = positions[i*2+3]*positionsScale[1]
+      var labelSize = f.labelSize || params.labelSize
+      var labelSizeScale = f.labelSizeScale || params.labelSizeScale || scale
+      var labelSize0 = labelSize[0]*labelSizeScale[0]
+      var labelSize1 = labelSize[1]*labelSizeScale[1]
+      var labelMargin = f.labelMargin || params.labelMargin
+      var labelMarginScale = f.labelMarginScale || params.labelMarginScale
+      var labelMargin0 = labelMargin[0]*labelMarginScale[0]
+      var labelMargin1 = labelMargin[1]*labelMarginScale[1]
+      var aspect = f.aspect || params.aspect || defaultScale
+
+      var dx = (p0-p2)*aspect
+      var dy = p1-p3
       var theta = Math.atan2(dy,dx)
       var s = Math.sin(theta), c = Math.cos(theta)
-      var cx = (f.positions[i*2+0]+f.positions[i*2+2])/2*f.aspect
-      var cy = (f.positions[i*2+1]+f.positions[i*2+3])/2
-      var lsx = f.labelSize[0]*f.aspect/2
-      var lsy = f.labelSize[1]/2
+      var cx = (p0+p2)/2*aspect
+      var cy = (p1+p3)/2
+      var lsx = labelSize0*aspect/2
+      var lsy = labelSize1/2
       var x0 = cx - lsx
       var x1 = cx + lsx
       var y0 = cy - lsy
@@ -30,17 +51,17 @@ module.exports = function () {
       rotate(v1, cx, cy, s, c, x1, y0)
       rotate(v2, cx, cy, s, c, x1, y1)
       rotate(v3, cx, cy, s, c, x0, y1)
-      out.positions.data[out.positions.offset++] = v0[0]/f.aspect
+      out.positions.data[out.positions.offset++] = v0[0]/aspect
       out.positions.data[out.positions.offset++] = v0[1]
-      out.positions.data[out.positions.offset++] = v1[0]/f.aspect
+      out.positions.data[out.positions.offset++] = v1[0]/aspect
       out.positions.data[out.positions.offset++] = v1[1]
-      out.positions.data[out.positions.offset++] = v2[0]/f.aspect
+      out.positions.data[out.positions.offset++] = v2[0]/aspect
       out.positions.data[out.positions.offset++] = v2[1]
-      out.positions.data[out.positions.offset++] = v3[0]/f.aspect
+      out.positions.data[out.positions.offset++] = v3[0]/aspect
       out.positions.data[out.positions.offset++] = v3[1]
 
-      var px = f.labelMargin[0]*f.aspect
-      var py = f.labelMargin[1]
+      var px = labelMargin0*aspect
+      var py = labelMargin1
       x0 -= px
       x1 += px
       y0 -= py
@@ -49,13 +70,13 @@ module.exports = function () {
       rotate(v1, cx, cy, s, c, x1, y0)
       rotate(v2, cx, cy, s, c, x1, y1)
       rotate(v3, cx, cy, s, c, x0, y1)
-      out.bounds.data[out.bounds.offset++] = v0[0]/f.aspect
+      out.bounds.data[out.bounds.offset++] = v0[0]/aspect
       out.bounds.data[out.bounds.offset++] = v0[1]
-      out.bounds.data[out.bounds.offset++] = v1[0]/f.aspect
+      out.bounds.data[out.bounds.offset++] = v1[0]/aspect
       out.bounds.data[out.bounds.offset++] = v1[1]
-      out.bounds.data[out.bounds.offset++] = v2[0]/f.aspect
+      out.bounds.data[out.bounds.offset++] = v2[0]/aspect
       out.bounds.data[out.bounds.offset++] = v2[1]
-      out.bounds.data[out.bounds.offset++] = v3[0]/f.aspect
+      out.bounds.data[out.bounds.offset++] = v3[0]/aspect
       out.bounds.data[out.bounds.offset++] = v3[1]
 
       out.cells.data[out.cells.offset++] = 0
@@ -64,7 +85,8 @@ module.exports = function () {
       out.cells.data[out.cells.offset++] = 0
       out.cells.data[out.cells.offset++] = 2
       out.cells.data[out.cells.offset++] = 3
-    }
+    },
+    params: params
   }
 }
 

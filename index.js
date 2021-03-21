@@ -8,7 +8,7 @@ function LabelMaker (opts) {
   if (!(this instanceof LabelMaker)) return new LabelMaker(opts)
   if (!opts) opts = {}
   this._cellType = opts.cellType || 'u16'
-  this._types = opts.types || {}
+  this.types = opts.types || {}
   this._outlines = opts.outlines !== undefined ? opts.outlines : false
   this.data = {
     positions: null,
@@ -40,7 +40,7 @@ LabelMaker.prototype.update = function (features) {
   var plen = 0, clen = 0, blen = 0
   for (var i = 0; i < features.length; i++) {
     var f = features[i]
-    var t = this._types[f.type]
+    var t = this.types[f.type]
     if (!t) throw new Error('implementation not provided for type=' + f.type)
     this._size.positions = 0
     this._size.cells = 0
@@ -95,7 +95,7 @@ LabelMaker.prototype._step = function () {
 
   for (var i = 0; i < this._features.length; i++) {
     var f = this._features[i]
-    var t = this._types[f.type]
+    var t = this.types[f.type]
     if (!t) throw new Error('implementation not provided for type=' + f.type)
     var pstart = this._dst.positions.offset
     var cstart = this._dst.cells.offset

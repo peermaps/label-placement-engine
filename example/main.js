@@ -1,10 +1,27 @@
 var regl = require('regl')()
+var scale = [2,window.innerWidth,2,window.innerHeight]
 var labelEngine = require('../')({
   outlines: true,
   types: {
     bbox: require('../preset/bbox')(),
-    point: require('../preset/point')(),
-    line: require('../preset/line')(),
+    point: require('../preset/point')({
+      labelMargin: [10,10],
+      pointSize: [10,10],
+      pointMargin: [10,10],
+      pointSeparation: [10,10],
+      labelSizeScale: scale,
+      labelMarginScale: scale,
+      pointSizeScale: scale,
+      pointMarginScale: scale,
+      pointSeparationScale: scale,
+    }),
+    line: require('../preset/line')({
+      labelSize: [100,20],
+      labelMargin: [10,10],
+      labelSizeScale: scale,
+      labelMarginScale: scale,
+      aspect: window.innerWidth/window.innerHeight
+    }),
   }
 })
 
@@ -12,29 +29,13 @@ var labels = [ { type: 'bbox', bounds: [-1,-1,+1,+1] } ]
 for (var i = 0; i < 25; i++) {
   labels.push({
     type: 'point',
-    pxLabelSize: [0,0], // dimensions of the label
-    pxLabelMargin: [10,10], // space around the label
-    pxPointSize: [10,10], // size of the point
-    pxPointMargin: [10,10], // space around the point
-    pxPointSeparation: [10,10], // distance between the label and point
     labelSize: [0,0],
-    labelMargin: [0,0],
-    pointSize: [0,0],
-    pointMargin: [0,0],
-    point:[0,0],
-    pointSeparation: [0,0]
+    point: [0,0]
   })
 }
 
 labels.push((function () {
-  var positions = [
-    +0.3,-1.0,
-    +0.1,-0.5,
-    +0.0,+0.4,
-    +0.4,+0.5,
-    +0.7,+0.8,
-    +0.6,+1.0
-  ]
+  var positions = [ +0.3,-1.0, +0.1,-0.5, +0.0,+0.4, +0.4,+0.5, +0.7,+0.8, +0.6,+1.0 ]
   var line = new Float32Array(positions.length*4)
   var offset = 0
   for (var i = 0; i < positions.length-2; i+=2) {
@@ -46,13 +47,7 @@ labels.push((function () {
   return {
     type: 'line',
     positions: positions,
-    line: line,
-    pxLabelSize: [100,20],
-    pxLabelMargin: [10,10],
-    labelSize: [0,0],
-    labelMargin: [0,0],
-    width: 0,
-    height: 0
+    line: line
   }
 })())
 
@@ -68,8 +63,8 @@ for (var i = 0; i < labels.length; i++) {
 function randomize() {
   for (var i = 0; i < labels.length; i++) {
     if (labels[i].type !== 'point') continue
-    labels[i].pxLabelSize[0] = 50 + Math.random()*150
-    labels[i].pxLabelSize[1] = 20
+    labels[i].labelSize[0] = 50 + Math.random()*150
+    labels[i].labelSize[1] = 20
     labels[i].point[0] = Math.random()*2-1
     labels[i].point[1] = Math.random()*2-1
   }
@@ -87,28 +82,10 @@ var lines = {
 lines.data = { outlines: lines.positions }
 
 function update() {
-  var m = Math.max(window.innerWidth,window.innerHeight)
   var w = window.innerWidth, h = window.innerHeight
-  for (var i = 0; i < labels.length; i++) {
-    if (labels[i].type === 'point') {
-      labels[i].labelSize[0] = labels[i].pxLabelSize[0]/w*2
-      labels[i].labelSize[1] = labels[i].pxLabelSize[1]/h*2
-      labels[i].labelMargin[0] = labels[i].pxLabelMargin[0]/w*2
-      labels[i].labelMargin[1] = labels[i].pxLabelMargin[1]/h*2
-      labels[i].pointSize[0] = labels[i].pxPointSize[0]/w*2
-      labels[i].pointSize[1] = labels[i].pxPointSize[1]/h*2
-      labels[i].pointMargin[0] = labels[i].pxPointMargin[0]/w*2
-      labels[i].pointMargin[1] = labels[i].pxPointMargin[1]/h*2
-      labels[i].pointSeparation[0] = labels[i].pxPointSeparation[0]/w*2
-      labels[i].pointSeparation[1] = labels[i].pxPointSeparation[1]/h*2
-    } else if (labels[i].type === 'line') {
-      labels[i].labelSize[0] = labels[i].pxLabelSize[0]/w*2
-      labels[i].labelSize[1] = labels[i].pxLabelSize[1]/h*2
-      labels[i].labelMargin[0] = labels[i].pxLabelMargin[0]/w*2
-      labels[i].labelMargin[1] = labels[i].pxLabelMargin[1]/h*2
-      labels[i].aspect = w/h
-    }
-  }
+  scale[0] = 2/w
+  scale[1] = 2/h
+  labelEngine.types.line.params.aspect = w/h
   labelEngine.update(labels)
 
   var poffset = 0, aoffset = 0, loffset = 0

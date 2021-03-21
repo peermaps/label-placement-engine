@@ -1,4 +1,5 @@
 var defaultScale = [1,1]
+var defaultSides = ['left','right','center']
 var v0 = [0,0]
 var v1 = [0,0]
 var v2 = [0,0]
@@ -13,8 +14,19 @@ module.exports = function (params) {
       out.bounds = 8
     },
     write: function (out, f) {
+      var sides = f.sides || params.sides || defaultSides
+      var side = f.side || params.side || sides[out.index % sides.length]
+      var index = -1
+      if (f.side || params.side) {
+        index = out.index
+      } else if (sides.length === 0) {
+        return
+      } else {
+        index = Math.floor(out.index / sides.length)
+      }
+
       var i = Math.floor((f.positions.length/2-1)/2)
-        + Math.floor((out.index+1)/2) * ((out.index%2)*2-1)
+        + Math.floor((index+1)/2) * ((index%2)*2-1)
       if (i*2 >= f.positions.length) return
 
       var scale = f.scale || params.scale || defaultScale
@@ -34,6 +46,10 @@ module.exports = function (params) {
       var labelMargin0 = labelMargin[0]*labelMarginScale[0]
       var labelMargin1 = labelMargin[1]*labelMarginScale[1]
       var aspect = f.aspect || params.aspect || defaultScale
+      var labelLineMargin = f.labelLineMargin || params.labelLineMargin || 0
+      var labelLineMarginScale = f.labelLineMarginScale || params.labelLineMarginScale || scale
+      var labelLineMargin0 = labelLineMargin
+        * (Array.isArray(labelLineMarginScale) ? labelLineMarginScale[1] : labelLineMarginScale)
 
       var dx = (p0-p2)*aspect
       var dy = p1-p3
@@ -43,10 +59,23 @@ module.exports = function (params) {
       var cy = (p1+p3)/2
       var lsx = labelSize0*aspect/2
       var lsy = labelSize1/2
-      var x0 = cx - lsx
-      var x1 = cx + lsx
-      var y0 = cy - lsy
-      var y1 = cy + lsy
+      var x0, x1, y0, y1
+      if (side === 'left') {
+        x0 = cx - lsx
+        x1 = cx + lsx
+        y0 = cy - lsy*2 - labelLineMargin0
+        y1 = cy - labelLineMargin0
+      } else if (side === 'center') {
+        x0 = cx - lsx
+        x1 = cx + lsx
+        y0 = cy - lsy
+        y1 = cy + lsy
+      } else if (side === 'right') {
+        x0 = cx - lsx
+        x1 = cx + lsx
+        y0 = cy + labelLineMargin0
+        y1 = cy + lsy*2 + labelLineMargin0
+      }
       rotate(v0, cx, cy, s, c, x0, y0)
       rotate(v1, cx, cy, s, c, x1, y0)
       rotate(v2, cx, cy, s, c, x1, y1)

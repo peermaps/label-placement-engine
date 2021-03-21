@@ -1,5 +1,5 @@
 var regl = require('regl')()
-var scale = [2,window.innerWidth,2,window.innerHeight]
+var scale = [2/window.innerWidth,2/window.innerHeight]
 var labelEngine = require('../')({
   outlines: true,
   types: {
@@ -16,16 +16,20 @@ var labelEngine = require('../')({
       pointSeparationScale: scale,
     }),
     line: require('../preset/line')({
+      sides: ['left','right'],
       labelSize: [100,20],
       labelMargin: [10,10],
       labelSizeScale: scale,
       labelMarginScale: scale,
+      labelLineMargin: 10,
+      labelLineMarginScale: scale,
       aspect: window.innerWidth/window.innerHeight
     }),
   }
 })
 
 var labels = [ { type: 'bbox', bounds: [-1,-1,+1,+1] } ]
+
 for (var i = 0; i < 25; i++) {
   labels.push({
     type: 'point',

@@ -1,4 +1,4 @@
-# label-maker
+# label-placement-engine
 
 build and update simplicial complex geometry for 2d label placement
 
@@ -14,7 +14,7 @@ or this example creates some labels and displays 2 ways or getting at the geomet
 
 ``` js
 // initialize with presets
-var labelEngine = require('label-maker')({
+var labelEngine = require('label-placement-engine')({
   types: {
     point: require('../preset/point')({
       labelMargin: [10,10],
@@ -56,15 +56,15 @@ console.log({
 # api
 
 ```
-var LabelMaker = require('label-maker')
+var LabelEngine = require('label-placement-engine')
 var presets = {
-  point: require('label-maker/preset/point'),
-  line: require('label-maker/preset/line'),
-  bbox: require('label-maker/preset/bbox'),
+  point: require('label-placement-engine/preset/point'),
+  line: require('label-placement-engine/preset/line'),
+  bbox: require('label-placement-engine/preset/bbox'),
 }
 ```
 
-## var engine = LabelMaker(opts)
+## var engine = LabelEngine(opts)
 
 * `opts.types` - object mapping a type name to a geometry function (see below)
 * `opts.cellType` - element default: `'u16'`
@@ -137,7 +137,7 @@ These are useful if you have other vertex attributes to assign for your shaders.
 # install
 
 ```
-npm install label-maker
+npm install label-placement-engine
 ```
 
 # license

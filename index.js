@@ -2,10 +2,10 @@ var polygonIntersect = require('polygon-intersect-test')
 var bbox = [0,0,0,0]
 var irange = [0,0], jrange = [0,0]
 
-module.exports = LabelMaker
+module.exports = LabelEngine
 
-function LabelMaker (opts) {
-  if (!(this instanceof LabelMaker)) return new LabelMaker(opts)
+function LabelEngine (opts) {
+  if (!(this instanceof LabelEngine)) return new LabelEngine(opts)
   if (!opts) opts = {}
   this._cellType = opts.cellType || 'u16'
   this.types = opts.types || {}
@@ -35,7 +35,7 @@ function LabelMaker (opts) {
   this._size = { positions: 0, cells: 0, bounds: 0 }
 }
 
-LabelMaker.prototype.update = function (features) {
+LabelEngine.prototype.update = function (features) {
   this._features = features
   var plen = 0, clen = 0, blen = 0
   for (var i = 0; i < features.length; i++) {
@@ -87,7 +87,7 @@ LabelMaker.prototype.update = function (features) {
   this._step()
 }
 
-LabelMaker.prototype._step = function () {
+LabelEngine.prototype._step = function () {
   var plen = 0, clen = 0, ooffset = 0
   this._dst.positions.offset = 0
   this._dst.positions.data = this.data.positions
@@ -192,7 +192,7 @@ LabelMaker.prototype._step = function () {
   this.count.outlines = ooffset/2
 }
 
-LabelMaker.prototype.isVisible = function (i) {
+LabelEngine.prototype.isVisible = function (i) {
   return this.visible[i] > 0.5
 }
 

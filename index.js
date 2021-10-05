@@ -31,7 +31,7 @@ function LabelMaker (opts) {
     bounds: { offset: 0, data: null }
   }
   this.visible = null
-  this.offsets = { bounds: null }
+  this.offsets = { bounds: null, positions: null }
   this._size = { positions: 0, cells: 0, bounds: 0 }
 }
 

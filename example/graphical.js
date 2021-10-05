@@ -97,7 +97,7 @@ function update() {
     if (labels[i].type === 'point') {
       points.positions[poffset++] = labels[i].point[0]
       points.positions[poffset++] = labels[i].point[1]
-      points.active[aoffset++] = labelEngine._visible[i]
+      points.active[aoffset++] = labelEngine.visible[i]
     } else if (labels[i].type === 'line') {
       for (var j = 0; j < labels[i].positions.length-2; j+=2) {
         lines.positions[loffset++] = labels[i].positions[j+0]

@@ -1,5 +1,5 @@
 {
-  "name": "label-maker",
+  "name": "label-placement-engine",
   "version": "1.0.0",
   "description": "build and update simplicial complex geometry for 2d label placement",
   "dependencies": {

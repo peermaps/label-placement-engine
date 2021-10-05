@@ -81,6 +81,9 @@ LabelMaker.prototype.update = function (features) {
   if (!this._offsets.bounds || features.length*2 > this._offsets.bounds.length) {
     this._offsets.bounds = new Float32Array(features.length*2)
   }
+  if (!this._offsets.positions || features.length*2 > this._offsets.positions.length) {
+    this._offsets.positions = new Float32Array(features.length*2)
+  }
   this._step()
 }
 
@@ -117,6 +120,8 @@ LabelMaker.prototype._step = function () {
       }
       this._offsets.bounds[i*2+0] = bstart
       this._offsets.bounds[i*2+1] = bend
+      this._offsets.positions[i*2+0] = pstart
+      this._offsets.positions[i*2+1] = pend
 
       bbox[0] = Infinity
       bbox[1] = Infinity

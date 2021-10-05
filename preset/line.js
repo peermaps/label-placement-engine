@@ -30,7 +30,6 @@ module.exports = function (params) {
       if (i*2 >= f.positions.length) return
 
       var scale = f.scale || params.scale || defaultScale
-
       var positions = f.positions || params.positions
       var positionsScale = f.positionsScale || params.positionsScale || scale
       var p0 = positions[i*2+0]*positionsScale[0]

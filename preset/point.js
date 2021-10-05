@@ -1,4 +1,5 @@
 var defaultScale = [1,1]
+var zero2 = [0,0]
 
 module.exports = function (params) {
   if (!params) params = {}
@@ -17,22 +18,22 @@ module.exports = function (params) {
       var xmin, ymin, xmax, ymax
       var scale = f.scale || params.scale || defaultScale
 
-      var labelSize = f.labelSize || params.labelSize
+      var labelSize = f.labelSize || params.labelSize || zero2
       var labelSizeScale = f.labelSizeScale || params.labelSizeScale || scale
       var labelSize0 = labelSize[0]*labelSizeScale[0]
       var labelSize1 = labelSize[1]*labelSizeScale[1]
 
-      var labelMargin = f.labelMargin || params.labelMargin
+      var labelMargin = f.labelMargin || params.labelMargin || zero2
       var labelMarginScale = f.labelMarginScale || params.labelMarginScale || scale
       var labelMargin0 = labelMargin[0]*labelMarginScale[0]
       var labelMargin1 = labelMargin[1]*labelMarginScale[1]
 
-      var pointMargin = f.pointMargin || params.pointMargin
+      var pointMargin = f.pointMargin || params.pointMargin || zero2
       var pointMarginScale = f.pointMarginScale || params.pointMarginScale || scale
       var pointMargin0 = pointMargin[0]*pointMarginScale[0]
       var pointMargin1 = pointMargin[1]*pointMarginScale[1]
 
-      var pointSize = f.pointSize || params.pointSize
+      var pointSize = f.pointSize || params.pointSize || zero2
       var pointSizeScale = f.pointSizeScale || params.pointSizeScale || scale
       var pointSize0 = pointSize[0]*pointSizeScale[0]
       var pointSize1 = pointSize[1]*pointSizeScale[1]

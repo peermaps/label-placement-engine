@@ -16,7 +16,7 @@ var labelEngine = require('../')({
       pointSeparationScale: scale,
     }),
     line: require('../preset/line')({
-      sides: ['left','right'],
+      sides: ['center','left','right'],
       labelSize: [100,20],
       labelMargin: [10,10],
       labelSizeScale: scale,

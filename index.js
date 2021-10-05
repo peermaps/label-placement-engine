@@ -30,8 +30,8 @@ function LabelMaker (opts) {
     cells: { offset: 0, data: null },
     bounds: { offset: 0, data: null }
   }
-  this._visible = null
-  this._offsets = { bounds: null }
+  this.visible = null
+  this.offsets = { bounds: null }
   this._size = { positions: 0, cells: 0, bounds: 0 }
 }
 
@@ -73,16 +73,16 @@ LabelMaker.prototype.update = function (features) {
   if (!this.data.bbox || features.length * 4 > this.data.bbox.length) {
     this.data.bbox = new Float32Array(features.length*4)
   }
-  if (!this._visible || this._visible.length !== features.length) {
-    this._visible = new Float32Array(features.length)
+  if (!this.visible || this.visible.length !== features.length) {
+    this.visible = new Float32Array(features.length)
   } else {
-    this._visible.fill(0)
+    this.visible.fill(0)
   }
-  if (!this._offsets.bounds || features.length*2 > this._offsets.bounds.length) {
-    this._offsets.bounds = new Float32Array(features.length*2)
+  if (!this.offsets.bounds || features.length*2 > this.offsets.bounds.length) {
+    this.offsets.bounds = new Float32Array(features.length*2)
   }
-  if (!this._offsets.positions || features.length*2 > this._offsets.positions.length) {
-    this._offsets.positions = new Float32Array(features.length*2)
+  if (!this.offsets.positions || features.length*2 > this.offsets.positions.length) {
+    this.offsets.positions = new Float32Array(features.length*2)
   }
   this._step()
 }
@@ -118,10 +118,10 @@ LabelMaker.prototype._step = function () {
       for (var j = cstart; j < cend; j++) {
         this.data.cells[j] += pstart/2
       }
-      this._offsets.bounds[i*2+0] = bstart
-      this._offsets.bounds[i*2+1] = bend
-      this._offsets.positions[i*2+0] = pstart
-      this._offsets.positions[i*2+1] = pend
+      this.offsets.bounds[i*2+0] = bstart
+      this.offsets.bounds[i*2+1] = bend
+      this.offsets.positions[i*2+0] = pstart
+      this.offsets.positions[i*2+1] = pend
 
       bbox[0] = Infinity
       bbox[1] = Infinity
@@ -152,10 +152,10 @@ LabelMaker.prototype._step = function () {
       if (visible) {
         for (var j = 0; j < i; j++) {
           if (j === i) continue
-          if (this._visible[j] < 0.5) continue
+          if (this.visible[j] < 0.5) continue
           if (boxOverlap(i*4,this.data.bbox,j*4,this.data.bbox)) {
-            jrange[0] = this._offsets.bounds[j*2+0]
-            jrange[1] = this._offsets.bounds[j*2+1]
+            jrange[0] = this.offsets.bounds[j*2+0]
+            jrange[1] = this.offsets.bounds[j*2+1]
             if (polygonIntersect(this.data.bounds,this.data.bounds,irange,jrange)) {
               visible = false
               break
@@ -163,19 +163,19 @@ LabelMaker.prototype._step = function () {
           }
         }
       }
-      this._visible[i] = visible
+      this.visible[i] = visible
       if (visible) {
         found = true
       }
     }
-    if (this._visible[i] < 0.5) {
+    if (this.visible[i] < 0.5) {
       this._dst.positions.offset = pstart
       this._dst.cells.offset = cstart
       this._dst.bounds.offset = bstart
-      this._offsets.bounds[i*2+0] = bstart
-      this._offsets.bounds[i*2+1] = bstart
+      this.offsets.bounds[i*2+0] = bstart
+      this.offsets.bounds[i*2+1] = bstart
     }
-    if (this._outlines && this._visible[i] > 0.5) {
+    if (this._outlines && this.visible[i] > 0.5) {
       var n = bend-bstart
       for (var j = 0; j < n; j+=2) {
         this.data.outlines[ooffset++] = this.data.bounds[bstart+j+0]
@@ -190,6 +190,10 @@ LabelMaker.prototype._step = function () {
   this.count.cells = this._dst.cells.offset
   this.count.bounds = this._dst.bounds.offset/2
   this.count.outlines = ooffset/2
+}
+
+LabelMaker.prototype.isVisible = function (i) {
+  return this.visible[i] > 0.5
 }
 
 function boxOverlap(ai, a, bi, b) {

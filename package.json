@@ -1,6 +1,6 @@
 {
   "name": "label-placement-engine",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "build and update simplicial complex geometry for 2d label placement",
   "dependencies": {
     "polygon-intersect-test": "^1.0.0"

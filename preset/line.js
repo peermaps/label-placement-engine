@@ -1,3 +1,4 @@
+var vec2set = require('gl-vec2/set')
 var defaultScale = [1,1]
 var defaultSides = ['left','right','center']
 var v0 = [0,0]
@@ -50,10 +51,7 @@ module.exports = function (params) {
       var labelLineMargin0 = labelLineMargin
         * (Array.isArray(labelLineMarginScale) ? labelLineMarginScale[1] : labelLineMarginScale)
 
-      var dx = (p0-p2)*aspect
-      var dy = p1-p3
-      var theta = Math.atan2(dy,dx)
-      var s = Math.sin(theta), c = Math.cos(theta)
+      var theta = 0
       var cx = (p0+p2)/2*aspect
       var cy = (p1+p3)/2
       var lsx = labelSize0*aspect/2
@@ -75,10 +73,10 @@ module.exports = function (params) {
         y0 = cy + labelLineMargin0
         y1 = cy + lsy*2 + labelLineMargin0
       }
-      rotate(v0, cx, cy, s, c, x0, y0)
-      rotate(v1, cx, cy, s, c, x1, y0)
-      rotate(v2, cx, cy, s, c, x1, y1)
-      rotate(v3, cx, cy, s, c, x0, y1)
+      vec2set(v0, x0, y0)
+      vec2set(v1, x1, y0)
+      vec2set(v2, x1, y1)
+      vec2set(v3, x0, y1)
       out.positions.data[out.positions.offset++] = v0[0]/aspect
       out.positions.data[out.positions.offset++] = v0[1]
       out.positions.data[out.positions.offset++] = v1[0]/aspect
@@ -94,10 +92,10 @@ module.exports = function (params) {
       x1 += px
       y0 -= py
       y1 += py
-      rotate(v0, cx, cy, s, c, x0, y0)
-      rotate(v1, cx, cy, s, c, x1, y0)
-      rotate(v2, cx, cy, s, c, x1, y1)
-      rotate(v3, cx, cy, s, c, x0, y1)
+      vec2set(v0, x0, y0)
+      vec2set(v1, x1, y0)
+      vec2set(v2, x1, y1)
+      vec2set(v3, x0, y1)
       out.bounds.data[out.bounds.offset++] = v0[0]/aspect
       out.bounds.data[out.bounds.offset++] = v0[1]
       out.bounds.data[out.bounds.offset++] = v1[0]/aspect
@@ -116,14 +114,4 @@ module.exports = function (params) {
     },
     params: params
   }
-}
-
-function rotate(out, cx, cy, s, c, x, y) {
-  out[0] = x - cx
-  out[1] = y - cy
-  var xn = out[0]*c - out[1]*s
-  var yn = out[0]*s + out[1]*c
-  out[0] = xn + cx
-  out[1] = yn + cy
-  return out
 }

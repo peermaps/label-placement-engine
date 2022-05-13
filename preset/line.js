@@ -1,6 +1,7 @@
 var vec2set = require('gl-vec2/set')
 var defaultScale = [1,1]
 var defaultSides = ['left','right','center']
+var order = require('bfs2inorder')
 var v0 = [0,0]
 var v1 = [0,0]
 var v2 = [0,0]
@@ -26,9 +27,10 @@ module.exports = function (params) {
         index = Math.floor(out.index / sides.length)
       }
 
-      var i = Math.floor((f.positions.length/2-1)/2)
-        + Math.floor((index+1)/2) * ((index%2)*2-1)
-      if (i*2 >= f.positions.length) return
+      var n = f.positions.length/2
+      if (out.index >= n-1) return
+      var i = order(n-1, out.index)
+      if (i < 0) return
 
       var scale = f.scale || params.scale || defaultScale
       var positions = f.positions || params.positions

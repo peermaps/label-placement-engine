@@ -71,6 +71,7 @@ var presets = {
 * `opts.cellType` - element default: `'u16'`
 * `opts.outlines` - when `true`, generate `engine.data.lines` suitable for line rendering,
   tracing around the perimeter of each feature used for collisions
+* `opts.maxIndex` - maximum number of label iterations (default: 50)
 
 Preset geometry functions to pass in as `opts.types` are provided in the `preset/` directory of this
 package.

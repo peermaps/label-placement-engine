@@ -33,6 +33,7 @@ function LabelEngine (opts) {
   this.visible = null
   this.offsets = { bounds: null, positions: null }
   this._size = { positions: 0, cells: 0, bounds: 0 }
+  this._maxIndex = opts.maxIndex === undefined ? 50 : opts.maxIndex
 }
 
 LabelEngine.prototype.update = function (features) {
@@ -106,7 +107,7 @@ LabelEngine.prototype._step = function () {
 
     this._dst.index = 0
     var found = false
-    while (!found) {
+    while (!found && this._dst.index < this._maxIndex) {
       this._dst.positions.offset = pstart
       this._dst.cells.offset = cstart
       this._dst.bounds.offset = bstart

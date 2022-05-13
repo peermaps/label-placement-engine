@@ -25,17 +25,20 @@ var labelEngine = require('../')({
       labelLineMarginScale: scale,
       aspect: window.innerWidth/window.innerHeight
     }),
+    area: require('../preset/area')({
+      sides: ['center','left','right'],
+      labelSize: [100,20],
+      labelMargin: [10,10],
+      labelSizeScale: scale,
+      labelMarginScale: scale,
+    }),
   }
 })
 
 var labels = [ { type: 'bbox', bounds: [-1,-1,+1,+1] } ]
 
 for (var i = 0; i < 25; i++) {
-  labels.push({
-    type: 'point',
-    labelSize: [0,0],
-    point: [0,0]
-  })
+  labels.push({ type: 'point', labelSize: [0,0], point: [0,0] })
 }
 
 labels.push((function () {
@@ -55,11 +58,31 @@ labels.push((function () {
   }
 })())
 
+labels.push((function () {
+  var positions = [ -0.8, +0.4, -0.2, +0.0, -0.7, -0.3 ]
+  var line = new Float32Array(positions.length*4+4)
+  var offset = 0
+  var n = positions.length
+  for (var i = 0; i < n; i+=2) {
+    line[offset++] = positions[(i+0)%n]
+    line[offset++] = positions[(i+1)%n]
+    line[offset++] = positions[(i+2)%n]
+    line[offset++] = positions[(i+3)%n]
+  }
+  return {
+    type: 'area',
+    positions: positions,
+    line: line
+  }
+})())
+
 var counts = { point: 0, line: 0 }
 for (var i = 0; i < labels.length; i++) {
   if (labels[i].type === 'point') {
     counts.point++
   } else if (labels[i].type === 'line') {
+    counts.line += labels[i].line.length
+  } else if (labels[i].type === 'area') {
     counts.line += labels[i].line.length
   }
 }
@@ -104,6 +127,15 @@ function update() {
         lines.positions[loffset++] = labels[i].positions[j+1]
         lines.positions[loffset++] = labels[i].positions[j+2]
         lines.positions[loffset++] = labels[i].positions[j+3]
+      }
+      counts.line += labels[i].positions.length/2
+    } else if (labels[i].type === 'area') {
+      var n = labels[i].positions.length
+      for (var j = 0; j < n; j+=2) {
+        lines.positions[loffset++] = labels[i].positions[(j+0)%n]
+        lines.positions[loffset++] = labels[i].positions[(j+1)%n]
+        lines.positions[loffset++] = labels[i].positions[(j+2)%n]
+        lines.positions[loffset++] = labels[i].positions[(j+3)%n]
       }
       counts.line += labels[i].positions.length/2
     }

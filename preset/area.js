@@ -1,10 +1,8 @@
 var vec2set = require('gl-vec2/set')
+var ptest = require('polygon-intersect-test/flat')
 var defaultScale = [1,1]
-var defaultSides = ['left','right','center']
-var v0 = [0,0]
-var v1 = [0,0]
-var v2 = [0,0]
-var v3 = [0,0]
+var v0 = [0,0], v1 = [0,0], v2 = [0,0], v3 = [0,0]
+var P = [0,0,0,0,0,0,0,0]
 
 module.exports = function (params) {
   if (!params) params = {}
@@ -15,28 +13,10 @@ module.exports = function (params) {
       out.bounds = 8
     },
     write: function (out, f) {
-      var sides = f.sides || params.sides || defaultSides
-      var side = f.side || params.side || sides[out.index % sides.length]
-      var index = -1
-      if (f.side || params.side) {
-        index = out.index
-      } else if (sides.length === 0) {
-        return
-      } else {
-        index = Math.floor(out.index / sides.length)
-      }
-
-      var i = Math.floor((f.positions.length/2-1)/2)
-        + Math.floor((index+1)/2) * ((index%2)*2-1)
-      if (i*2 >= f.positions.length) return
-
       var scale = f.scale || params.scale || defaultScale
       var positions = f.positions || params.positions
       var positionsScale = f.positionsScale || params.positionsScale || scale
-      var p0 = positions[i*2+0]*positionsScale[0]
-      var p1 = positions[i*2+1]*positionsScale[1]
-      var p2 = positions[i*2+2]*positionsScale[0]
-      var p3 = positions[i*2+3]*positionsScale[1]
+
       var labelSize = f.labelSize || params.labelSize
       var labelSizeScale = f.labelSizeScale || params.labelSizeScale || scale
       var labelSize0 = labelSize[0]*labelSizeScale[0]
@@ -46,36 +26,25 @@ module.exports = function (params) {
       var labelMargin0 = labelMargin[0]*labelMarginScale[0]
       var labelMargin1 = labelMargin[1]*labelMarginScale[1]
       var aspect = f.aspect || params.aspect || 1
-      var labelLineMargin = f.labelLineMargin || params.labelLineMargin || 0
-      var labelLineMarginScale = f.labelLineMarginScale || params.labelLineMarginScale || scale
-      var labelLineMargin0 = labelLineMargin
-        * (Array.isArray(labelLineMarginScale) ? labelLineMarginScale[1] : labelLineMarginScale)
 
-      var cx = (p0+p2)/2*aspect
-      var cy = (p1+p3)/2
+      var cx = 0, cy = 0, n = positions.length/2
+      for (var i = 0; i < positions.length; i+=2) {
+        cx += positions[i+0]/n
+        cy += positions[i+1]/n
+      }
       var lsx = labelSize0*aspect/2
       var lsy = labelSize1/2
-      var x0, x1, y0, y1
-      if (side === 'left') {
-        x0 = cx - lsx
-        x1 = cx + lsx
-        y0 = cy - lsy*2 - labelLineMargin0
-        y1 = cy - labelLineMargin0
-      } else if (side === 'center') {
-        x0 = cx - lsx
-        x1 = cx + lsx
-        y0 = cy - lsy
-        y1 = cy + lsy
-      } else if (side === 'right') {
-        x0 = cx - lsx
-        x1 = cx + lsx
-        y0 = cy + labelLineMargin0
-        y1 = cy + lsy*2 + labelLineMargin0
-      }
+      var x0 = cx - lsx
+      var x1 = cx + lsx
+      var y0 = cy - lsy
+      var y1 = cy + lsy
       vec2set(v0, x0, y0)
       vec2set(v1, x1, y0)
       vec2set(v2, x1, y1)
       vec2set(v3, x0, y1)
+      pset(P, v0, v1, v2, v3)
+      if (!ptest(P, positions)) return // only show if label intersects polygon
+
       out.positions.data[out.positions.offset++] = v0[0]/aspect
       out.positions.data[out.positions.offset++] = v0[1]
       out.positions.data[out.positions.offset++] = v1[0]/aspect
@@ -113,4 +82,15 @@ module.exports = function (params) {
     },
     params: params
   }
+}
+
+function pset(X, p0, p1, p2, p3) {
+  X[0] = p0[0]
+  X[1] = p0[1]
+  X[2] = p1[0]
+  X[3] = p1[1]
+  X[4] = p2[0]
+  X[5] = p2[1]
+  X[6] = p3[0]
+  X[7] = p3[1]
 }

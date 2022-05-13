@@ -60,6 +60,7 @@ var LabelEngine = require('label-placement-engine')
 var presets = {
   point: require('label-placement-engine/preset/point'),
   line: require('label-placement-engine/preset/line'),
+  area: require('label-placement-engine/preset/area'),
   bbox: require('label-placement-engine/preset/bbox'),
 }
 ```

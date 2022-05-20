@@ -1,4 +1,5 @@
 var defaultScale = [1,1]
+var defaultPlacements = ['top','bottom','right','left']
 var zero2 = [0,0]
 
 module.exports = function (params) {
@@ -43,7 +44,10 @@ module.exports = function (params) {
       var point0 = point[0]*pointScale[0]
       var point1 = point[1]*pointScale[1]
 
-      if (out.index === 0) { // top
+      var placements = f.placements || params.placements || defaultPlacements
+      var placement = f.placement || params.placement || placements[out.index]
+
+      if (placement === 'top') {
         xmin = point0 - labelSize0/2
         xmax = point0 + labelSize0/2
         ymin = point1 + pointMargin1
@@ -64,7 +68,7 @@ module.exports = function (params) {
         out.bounds.data[out.bounds.offset++] = ymax + labelMargin1
         out.bounds.data[out.bounds.offset++] = xmin - labelMargin0
         out.bounds.data[out.bounds.offset++] = ymax + labelMargin1
-      } else if (out.index === 1) { // bottom
+      } else if (placement === 'bottom') {
         xmin = point0 - labelSize0/2
         xmax = point0 + labelSize0/2
         ymin = point1 - pointMargin1 - labelSize1
@@ -85,7 +89,7 @@ module.exports = function (params) {
         out.bounds.data[out.bounds.offset++] = ymax + labelMargin1
         out.bounds.data[out.bounds.offset++] = xmin - labelMargin0
         out.bounds.data[out.bounds.offset++] = ymax + labelMargin1
-      } else if (out.index === 2) { // right
+      } else if (placement === 'right') {
         xmin = point0 + pointSize0/2 + pointMargin0
         xmax = point0 + pointSize0/2 + pointMargin0 + labelSize0
         ymin = point1 - labelSize1/2
@@ -106,7 +110,7 @@ module.exports = function (params) {
         out.bounds.data[out.bounds.offset++] = point1 + pointSize1/2 + pointMargin1
         out.bounds.data[out.bounds.offset++] = point0 - pointSize0/2 - pointMargin0
         out.bounds.data[out.bounds.offset++] = point1 + pointSize1/2 + pointMargin1
-      } else if (out.index === 3) { // left
+      } else if (placement === 'left') {
         xmin = point0 - pointSize0/2 - pointMargin0 - labelSize0
         xmax = point0 - pointSize0/2 - pointMargin0
         ymin = point1 - labelSize1/2
